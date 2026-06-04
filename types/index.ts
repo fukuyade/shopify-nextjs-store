@@ -66,3 +66,33 @@ export type ProductDetailResponse = {
     productByHandle: ProductDetail;
   };
 };
+
+// カート用
+export type CartLine = {
+  id: string;
+  quantity: number;
+  merchandise: {
+    id: string;
+    title: string;
+    price: Money;
+    product: {
+      title: string;
+      handle: string;
+      images: {
+        edges: Array<{ node: ProductImage }>;
+      };
+    };
+  };
+};
+
+export type Cart = {
+  id: string;
+  checkoutUrl: string;
+  totalQuantity: number;
+  cost: {
+    totalAmount: Money;
+  };
+  lines: {
+    edges: Array<{ node: CartLine }>;
+  };
+};

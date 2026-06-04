@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { ProductDetail, ProductVariant } from '@/types';
 import Button from '@/components/ui/Button';
+import { useCart } from '@/context/CartContext';
 
 type Props = {
   product: ProductDetail;
@@ -22,8 +24,16 @@ export default function ProductDetailSection({ product }: Props) {
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(variants[0]);
+  const [added, setAdded] = useState(false);
 
+  const { addItem, isLoading } = useCart();
   const price = selectedVariant?.price ?? product.priceRange.minVariantPrice;
+
+  async function handleAddToCart() {
+    if (!selectedVariant) return;
+    await addItem(selectedVariant.id);
+    setAdded(true);
+  }
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-12">
@@ -107,14 +117,38 @@ export default function ProductDetailSection({ product }: Props) {
             </div>
           )}
 
-          {/* カート追加ボタン */}
-          <Button
-            variant="primary"
-            className="w-full py-4 text-base"
-            disabled={!selectedVariant?.availableForSale}
-          >
-            {selectedVariant?.availableForSale ? 'カートに追加' : '在庫切れ'}
-          </Button>
+          {/* カート追加前：ボタン */}
+          {!added ? (
+            <Button
+              variant="primary"
+              className="w-full py-4 text-base"
+              disabled={!selectedVariant?.availableForSale || isLoading}
+              onClick={handleAddToCart}
+            >
+              {!selectedVariant?.availableForSale
+                ? '在庫切れ'
+                : isLoading
+                ? '追加中...'
+                : 'カートに追加'}
+            </Button>
+          ) : (
+            /* カート追加後：2つのボタンを表示 */
+            <div className="flex flex-col gap-3">
+              <p className="text-center text-sm text-green-600 font-medium">
+                ✓ カートに追加しました
+              </p>
+              <Link href="/cart">
+                <Button variant="primary" className="w-full py-4 text-base">
+                  カートに移動
+                </Button>
+              </Link>
+              <Link href="/">
+                <Button variant="outline" className="w-full py-4 text-base">
+                  他の商品を探す
+                </Button>
+              </Link>
+            </div>
+          )}
 
           {/* 商品説明 */}
           {product.descriptionHtml ? (
@@ -126,6 +160,17 @@ export default function ProductDetailSection({ product }: Props) {
             <p className="text-gray-600 leading-relaxed">{product.description}</p>
           )}
         </div>
+      </div>
+
+      {/* 商品一覧に戻るリンク */}
+      <div className="mt-16 pt-8 border-t border-gray-200">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+        >
+          <span>←</span>
+          <span>商品一覧に戻る</span>
+        </Link>
       </div>
     </section>
   );

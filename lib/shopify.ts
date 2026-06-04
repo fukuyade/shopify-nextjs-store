@@ -1,4 +1,4 @@
-import { Product, ProductsResponse, ProductDetail, ProductDetailResponse } from '@/types';
+import { Product, ProductsResponse, ProductDetail, ProductDetailResponse, Cart } from '@/types';
 
 const domain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN!;
 const token = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN!;
@@ -103,4 +103,84 @@ export async function getProductByHandle(handle: string): Promise<ProductDetail 
     handle,
   });
   return response.data.productByHandle ?? null;
+}
+
+// カートのフィールド（クエリ・ミューテーションで共通利用）
+const CART_FIELDS = `
+  id
+  checkoutUrl
+  totalQuantity
+  cost {
+    totalAmount {
+      amount
+      currencyCode
+    }
+  }
+  lines(first: 100) {
+    edges {
+      node {
+        id
+        quantity
+        merchandise {
+          ... on ProductVariant {
+            id
+            title
+            price {
+              amount
+              currencyCode
+            }
+            product {
+              title
+              handle
+              images(first: 1) {
+                edges {
+                  node {
+                    url
+                    altText
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+// カート作成
+const CART_CREATE_MUTATION = `
+  mutation CartCreate($lines: [CartLineInput!]) {
+    cartCreate(input: { lines: $lines }) {
+      cart {
+        ${CART_FIELDS}
+      }
+    }
+  }
+`;
+
+export async function createCart(variantId: string, quantity = 1): Promise<Cart> {
+  const response = await shopifyFetch(CART_CREATE_MUTATION, {
+    lines: [{ merchandiseId: variantId, quantity }],
+  });
+  return response.data.cartCreate.cart;
+}
+
+// カートに商品追加
+const CART_LINES_ADD_MUTATION = `
+  mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+    cartLinesAdd(cartId: $cartId, lines: $lines) {
+      cart {
+        ${CART_FIELDS}
+      }
+    }
+  }
+`;
+
+export async function addToCart(cartId: string, variantId: string, quantity = 1): Promise<Cart> {
+  const response = await shopifyFetch(CART_LINES_ADD_MUTATION, {
+    cartId,
+    lines: [{ merchandiseId: variantId, quantity }],
+  });
+  return response.data.cartLinesAdd.cart;
 }
