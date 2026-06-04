@@ -34,3 +34,35 @@ export type ProductsResponse = {
     };
   };
 };
+
+// 商品詳細ページ用
+export type ProductVariant = {
+  id: string;
+  title: string;
+  availableForSale: boolean;
+  price: Money;
+  selectedOptions: Array<{
+    name: string;
+    value: string;
+  }>;
+};
+
+export type ProductDetail = Product & {
+  descriptionHtml: string;
+  variants: {
+    edges: Array<{
+      node: ProductVariant;
+    }>;
+  };
+  images: {
+    edges: Array<{
+      node: ProductImage;
+    }>;
+  };
+};
+
+export type ProductDetailResponse = {
+  data: {
+    productByHandle: ProductDetail;
+  };
+};
