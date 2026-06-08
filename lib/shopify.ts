@@ -184,3 +184,17 @@ export async function addToCart(cartId: string, variantId: string, quantity = 1)
   });
   return response.data.cartLinesAdd.cart;
 }
+
+// カートをIDで取得（ページ更新時の復元用）
+const CART_QUERY = `
+  query GetCart($cartId: ID!) {
+    cart(id: $cartId) {
+      ${CART_FIELDS}
+    }
+  }
+`;
+
+export async function getCart(cartId: string): Promise<Cart | null> {
+  const response = await shopifyFetch(CART_QUERY, { cartId });
+  return response.data.cart ?? null;
+}
