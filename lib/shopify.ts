@@ -198,3 +198,45 @@ export async function getCart(cartId: string): Promise<Cart | null> {
   const response = await shopifyFetch(CART_QUERY, { cartId });
   return response.data.cart ?? null;
 }
+
+// カートの商品個数を変更
+const CART_LINES_UPDATE_MUTATION = `
+  mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+    cartLinesUpdate(cartId: $cartId, lines: $lines) {
+      cart {
+        ${CART_FIELDS}
+      }
+    }
+  }
+`;
+
+export async function updateCartLine(
+  cartId: string,
+  lineId: string,
+  quantity: number
+): Promise<Cart> {
+  const response = await shopifyFetch(CART_LINES_UPDATE_MUTATION, {
+    cartId,
+    lines: [{ id: lineId, quantity }],
+  });
+  return response.data.cartLinesUpdate.cart;
+}
+
+// カートから商品を削除
+const CART_LINES_REMOVE_MUTATION = `
+  mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+      cart {
+        ${CART_FIELDS}
+      }
+    }
+  }
+`;
+
+export async function removeCartLine(cartId: string, lineId: string): Promise<Cart> {
+  const response = await shopifyFetch(CART_LINES_REMOVE_MUTATION, {
+    cartId,
+    lineIds: [lineId],
+  });
+  return response.data.cartLinesRemove.cart;
+}

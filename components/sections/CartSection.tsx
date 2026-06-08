@@ -13,9 +13,8 @@ function formatPrice(amount: string, currencyCode: string): string {
 }
 
 export default function CartSection() {
-  const { cart } = useCart();
+  const { cart, isLoading, updateItem, removeItem } = useCart();
 
-  // カートが空の場合
   if (!cart || cart.totalQuantity === 0) {
     return (
       <section className="max-w-2xl mx-auto px-4 py-24 text-center">
@@ -65,20 +64,51 @@ export default function CartSection() {
 
               {/* 商品情報 */}
               <div className="flex-1 flex flex-col justify-between">
-                <div>
-                  <Link
-                    href={`/products/${line.merchandise.product.handle}`}
-                    className="font-semibold text-gray-900 hover:underline"
+                <div className="flex justify-between items-start">
+                  <div>
+                    <Link
+                      href={`/products/${line.merchandise.product.handle}`}
+                      className="font-semibold text-gray-900 hover:underline"
+                    >
+                      {productTitle}
+                    </Link>
+                    {variantTitle !== 'Default Title' && (
+                      <p className="text-sm text-gray-500 mt-1">{variantTitle}</p>
+                    )}
+                  </div>
+
+                  {/* 削除ボタン */}
+                  <button
+                    onClick={() => removeItem(line.id)}
+                    disabled={isLoading}
+                    className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-40 text-sm"
                   >
-                    {productTitle}
-                  </Link>
-                  {/* Default Title はバリアントが1つのみの場合に出るので非表示 */}
-                  {variantTitle !== 'Default Title' && (
-                    <p className="text-sm text-gray-500 mt-1">{variantTitle}</p>
-                  )}
+                    削除
+                  </button>
                 </div>
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-sm text-gray-500">数量: {line.quantity}</p>
+
+                <div className="flex items-center justify-between mt-3">
+                  {/* 個数変更 */}
+                  <div className="flex items-center border border-gray-300 rounded-md">
+                    <button
+                      onClick={() => updateItem(line.id, line.quantity - 1)}
+                      disabled={isLoading || line.quantity <= 1}
+                      className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed rounded-l-md"
+                    >
+                      −
+                    </button>
+                    <span className="w-10 text-center text-sm font-medium">
+                      {line.quantity}
+                    </span>
+                    <button
+                      onClick={() => updateItem(line.id, line.quantity + 1)}
+                      disabled={isLoading}
+                      className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-40 rounded-r-md"
+                    >
+                      ＋
+                    </button>
+                  </div>
+
                   <p className="font-semibold text-gray-900">
                     {formatPrice(String(lineTotal), price.currencyCode)}
                   </p>

@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Cart } from '@/types';
-import { createCart, addToCart, getCart } from '@/lib/shopify';
+import { createCart, addToCart, getCart, updateCartLine, removeCartLine } from '@/lib/shopify';
 
 type CartContextType = {
   cart: Cart | null;
   isLoading: boolean;
   addItem: (variantId: string, quantity?: number) => Promise<void>;
+  updateItem: (lineId: string, quantity: number) => Promise<void>;
+  removeItem: (lineId: string) => Promise<void>;
 };
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -18,17 +20,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<Cart | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 起動時に localStorage からカートIDを復元
   useEffect(() => {
     const savedCartId = localStorage.getItem(CART_ID_KEY);
     if (!savedCartId) return;
 
-    // 保存されたIDでShopifyからカート情報を取得
     getCart(savedCartId).then((restored) => {
       if (restored) {
         setCart(restored);
       } else {
-        // カートが期限切れなどで取得できない場合は削除
         localStorage.removeItem(CART_ID_KEY);
       }
     });
@@ -42,7 +41,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setCart(updated);
       } else {
         const newCart = await createCart(variantId, quantity);
-        // カートIDを localStorage に保存
         localStorage.setItem(CART_ID_KEY, newCart.id);
         setCart(newCart);
       }
@@ -51,8 +49,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // 個数変更
+  async function updateItem(lineId: string, quantity: number) {
+    if (!cart) return;
+    setIsLoading(true);
+    try {
+      const updated = await updateCartLine(cart.id, lineId, quantity);
+      setCart(updated);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // 商品削除
+  async function removeItem(lineId: string) {
+    if (!cart) return;
+    setIsLoading(true);
+    try {
+      const updated = await removeCartLine(cart.id, lineId);
+      setCart(updated);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
-    <CartContext.Provider value={{ cart, isLoading, addItem }}>
+    <CartContext.Provider value={{ cart, isLoading, addItem, updateItem, removeItem }}>
       {children}
     </CartContext.Provider>
   );
