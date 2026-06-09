@@ -19,29 +19,30 @@ export default function ProductCard({ product }: Props) {
 
   return (
     <Link href={`/products/${product.handle}`} className="group block">
-      <div className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      <div className="rounded-xl overflow-hidden bg-white hover:shadow-md transition-shadow duration-200">
         {/* 商品画像 */}
-        <div className="relative aspect-square bg-gray-100">
+        <div className="relative aspect-square bg-gray-100 overflow-hidden">
           {image ? (
             <Image
               src={image.url}
               alt={image.altText ?? product.title}
               fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-200"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              No Image
+            <div className="flex items-center justify-center h-full text-gray-300 text-4xl">
+              📦
             </div>
           )}
         </div>
 
         {/* 商品情報 */}
-        <div className="p-4">
-          <h2 className="font-semibold text-gray-800 truncate">{product.title}</h2>
-          <p className="text-sm text-gray-500 mt-1 line-clamp-2">{product.description}</p>
-          <p className="mt-2 font-bold text-gray-900">
+        <div className="p-3 sm:p-4">
+          <h2 className="font-semibold text-gray-900 text-sm sm:text-base leading-snug line-clamp-2">
+            {product.title}
+          </h2>
+          <p className="mt-1.5 font-bold text-gray-900 text-sm sm:text-base">
             {formatPrice(price.amount, price.currencyCode)}
           </p>
         </div>

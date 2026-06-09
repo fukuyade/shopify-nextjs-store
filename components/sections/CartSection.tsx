@@ -121,8 +121,8 @@ export default function CartSection() {
 
       {/* 合計・チェックアウト */}
       <div className="border-t border-gray-200 pt-6 mt-4">
-        <div className="flex justify-between text-lg font-bold text-gray-900 mb-6">
-          <span>合計</span>
+        <div className="flex justify-between text-lg font-bold text-gray-900 mb-2">
+          <span>小計</span>
           <span>
             {formatPrice(
               cart.cost.totalAmount.amount,
@@ -130,10 +130,11 @@ export default function CartSection() {
             )}
           </span>
         </div>
+        <p className="text-xs text-gray-400 mb-6">※ 送料・税は決済時に確定します</p>
 
         <a href={cart.checkoutUrl} target="_blank" rel="noopener noreferrer">
           <Button variant="primary" className="w-full py-4 text-base">
-            レジに進む
+            レジに進む →
           </Button>
         </a>
 

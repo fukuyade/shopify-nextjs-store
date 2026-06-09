@@ -17,6 +17,84 @@ export async function shopifyFetch(query: string, variables = {}) {
   return response.json();
 }
 
+// タグで商品を絞り込み（コレクションページ用）
+const PRODUCTS_BY_TAG_QUERY = `
+  query GetProductsByTag($query: String!, $first: Int!) {
+    products(first: $first, query: $query) {
+      edges {
+        node {
+          id
+          title
+          handle
+          description
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function getProductsByTag(tag: string, count = 24): Promise<Product[]> {
+  const response: ProductsResponse = await shopifyFetch(PRODUCTS_BY_TAG_QUERY, {
+    query: `tag:${tag}`,
+    first: count,
+  });
+  return response.data.products.edges.map((edge) => edge.node);
+}
+
+// 商品検索
+const SEARCH_PRODUCTS_QUERY = `
+  query SearchProducts($query: String!, $first: Int!) {
+    products(first: $first, query: $query) {
+      edges {
+        node {
+          id
+          title
+          handle
+          description
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function searchProducts(keyword: string, count = 24): Promise<Product[]> {
+  if (!keyword.trim()) return [];
+  const query = `title:*${keyword}* OR tag:${keyword}`;
+  const response: ProductsResponse = await shopifyFetch(SEARCH_PRODUCTS_QUERY, {
+    query,
+    first: count,
+  });
+  return response.data.products.edges.map((edge) => edge.node);
+}
+
 // 商品一覧取得
 const PRODUCTS_QUERY = `
   query GetProducts($first: Int!) {

@@ -1,43 +1,171 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
 import { useCart } from '@/context/CartContext';
+
+function SearchForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get('q') ?? '');
+
+  useEffect(() => {
+    setQuery(searchParams.get('q') ?? '');
+  }, [searchParams]);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (trimmed) {
+      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex items-center w-full">
+      <div className="relative flex items-center w-full">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="商品を検索..."
+          className="w-full pl-9 pr-8 py-1.5 text-sm border border-gray-300 rounded-full bg-gray-50 focus:outline-none focus:border-gray-900 focus:bg-white transition-all"
+        />
+        <button
+          type="submit"
+          className="absolute left-2.5 text-gray-400 hover:text-gray-700 transition-colors"
+          aria-label="検索"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+        {query && (
+          <button
+            type="button"
+            onClick={() => { setQuery(''); router.push('/'); }}
+            className="absolute right-3 text-gray-400 hover:text-gray-700 transition-colors"
+            aria-label="クリア"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+const NAV_LINKS = [
+  { href: '/', label: '商品一覧' },
+  { href: '/collections', label: 'コレクション' },
+];
 
 export default function Header() {
   const { cart } = useCart();
+  const pathname = usePathname();
   const itemCount = cart?.totalQuantity ?? 0;
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // ページ遷移時にメニューを閉じる
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-3">
+
         {/* ロゴ */}
-        <Link href="/" className="text-xl font-bold text-gray-900 hover:text-gray-600 transition-colors">
+        <Link href="/" className="text-xl font-bold text-gray-900 hover:text-gray-600 transition-colors flex-shrink-0">
           MyStore
         </Link>
 
-        {/* ナビゲーション */}
-        <nav className="hidden md:flex items-center gap-6">
-          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            商品一覧
-          </Link>
-          <Link href="/collections" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            コレクション
-          </Link>
-        </nav>
+        {/* 検索フォーム（中央・PC） */}
+        <div className="hidden sm:flex flex-1 justify-center max-w-sm mx-auto">
+          <Suspense fallback={<div className="w-full h-8 bg-gray-100 rounded-full" />}>
+            <SearchForm />
+          </Suspense>
+        </div>
 
-        {/* カートアイコン */}
-        <Link href="/cart" className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          {/* 件数バッジ */}
-          {itemCount > 0 && (
-            <span className="absolute top-0 right-0 bg-gray-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-              {itemCount > 99 ? '99+' : itemCount}
-            </span>
-          )}
-        </Link>
+        {/* 右側 */}
+        <div className="ml-auto flex items-center gap-2">
+          {/* PCナビ */}
+          <nav className="hidden md:flex items-center gap-4">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-sm transition-colors ${
+                  pathname === link.href
+                    ? 'text-gray-900 font-semibold'
+                    : 'text-gray-500 hover:text-gray-900'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* カートアイコン */}
+          <Link href="/cart" className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            {itemCount > 0 && (
+              <span className="absolute top-0 right-0 bg-gray-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                {itemCount > 99 ? '99+' : itemCount}
+              </span>
+            )}
+          </Link>
+
+          {/* ハンバーガーボタン（モバイルのみ） */}
+          <button
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="md:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            aria-label="メニュー"
+          >
+            {menuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* モバイルメニュー */}
+      {menuOpen && (
+        <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 flex flex-col gap-4">
+          {/* モバイル検索 */}
+          <Suspense fallback={<div className="w-full h-8 bg-gray-100 rounded-full" />}>
+            <SearchForm />
+          </Suspense>
+
+          {/* モバイルナビ */}
+          <nav className="flex flex-col gap-1">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`px-2 py-2.5 rounded-lg text-sm transition-colors ${
+                  pathname === link.href
+                    ? 'bg-gray-100 text-gray-900 font-semibold'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
