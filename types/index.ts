@@ -96,3 +96,54 @@ export type Cart = {
     edges: Array<{ node: CartLine }>;
   };
 };
+
+// 顧客（ユーザー認証）用
+export type CustomerAccessToken = {
+  accessToken: string;
+  expiresAt: string;
+};
+
+// Shopifyのバリデーションエラー
+export type CustomerUserError = {
+  code: string | null;
+  field: string[] | null;
+  message: string;
+};
+
+// 注文の明細1行
+export type OrderLineItem = {
+  title: string;
+  quantity: number;
+  variant: {
+    image: ProductImage | null;
+    price: Money;
+    product: {
+      handle: string;
+    } | null;
+  } | null;
+};
+
+// 注文1件
+export type Order = {
+  id: string;
+  orderNumber: number;
+  processedAt: string;
+  financialStatus: string | null;
+  fulfillmentStatus: string;
+  totalPrice: Money;
+  lineItems: {
+    edges: Array<{ node: OrderLineItem }>;
+  };
+};
+
+// 顧客情報（注文履歴含む）
+export type Customer = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  phone: string | null;
+  orders: {
+    edges: Array<{ node: Order }>;
+  };
+};

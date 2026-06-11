@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 function SearchForm() {
   const router = useRouter();
@@ -65,6 +66,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const { cart } = useCart();
+  const { isLoggedIn } = useAuth();
   const pathname = usePathname();
   const itemCount = cart?.totalQuantity ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
@@ -121,6 +123,20 @@ export default function Header() {
             )}
           </Link>
 
+          {/* アカウントアイコン */}
+          <Link
+            href={isLoggedIn ? '/account' : '/login'}
+            className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            aria-label={isLoggedIn ? 'アカウント' : 'ログイン'}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            {isLoggedIn && (
+              <span className="absolute top-1.5 right-1.5 bg-green-500 w-2 h-2 rounded-full ring-2 ring-white" />
+            )}
+          </Link>
+
           {/* ハンバーガーボタン（モバイルのみ） */}
           <button
             onClick={() => setMenuOpen((prev) => !prev)}
@@ -163,6 +179,16 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href={isLoggedIn ? '/account' : '/login'}
+              className={`px-2 py-2.5 rounded-lg text-sm transition-colors ${
+                pathname === '/account' || pathname === '/login'
+                  ? 'bg-gray-100 text-gray-900 font-semibold'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              {isLoggedIn ? 'アカウント' : 'ログイン'}
+            </Link>
           </nav>
         </div>
       )}
