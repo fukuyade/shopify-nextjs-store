@@ -1,101 +1,50 @@
-'use client';
+// ログインページ（新方式）
+// メール＋パスワードのフォームは廃止。Shopifyのホスト型ログインへ飛ばすだけ。
+// 新規登録もそのログイン画面側で行える。
 
-import { useState, useEffect, Suspense } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import Button from '@/components/ui/Button';
+export const metadata = {
+  title: 'ログイン | MyStore',
+  description: 'アカウントにログイン',
+};
 
-function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') ?? '/account';
-  const { login, isLoggedIn } = useAuth();
+const ERROR_MESSAGES: Record<string, string> = {
+  auth: '認証に失敗しました。お手数ですが、もう一度お試しください。',
+  token: 'ログイン処理に失敗しました。時間をおいて再度お試しください。',
+  expired: 'セッションの有効期限が切れました。再度ログインしてください。',
+};
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  // すでにログイン済みならリダイレクト
-  useEffect(() => {
-    if (isLoggedIn) router.replace(redirectTo);
-  }, [isLoggedIn, redirectTo, router]);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-    setSubmitting(true);
-    const result = await login(email, password);
-    setSubmitting(false);
-    if (result.ok) {
-      router.replace(redirectTo);
-    } else {
-      setError(result.message);
-    }
-  }
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  const message = error ? ERROR_MESSAGES[error] ?? 'ログインに失敗しました。' : null;
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16">
+    <div className="max-w-md mx-auto px-4 py-20 text-center">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">ログイン</h1>
-      <p className="text-sm text-gray-500 mb-8">アカウントにログインして注文履歴を確認できます。</p>
+      <p className="text-sm text-gray-500 mb-8">
+        Shopifyの安全なログイン画面に移動します。アカウントをお持ちでない方も、その画面から登録できます。
+      </p>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            メールアドレス
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition-colors"
-            placeholder="you@example.com"
-          />
-        </div>
+      {message && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-6">
+          {message}
+        </p>
+      )}
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            パスワード
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition-colors"
-            placeholder="••••••••"
-          />
-        </div>
+      {/* route handlerへの遷移なので next/link ではなく通常の <a> を使う */}
+      <a
+        href="/api/auth/login"
+        className="inline-flex items-center justify-center w-full px-6 py-3 rounded-lg font-medium bg-gray-900 text-white hover:bg-gray-700 transition-colors"
+      >
+        ログイン / 新規登録に進む
+      </a>
 
-        {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-            {error}
-          </p>
-        )}
-
-        <Button type="submit" disabled={submitting} className="w-full">
-          {submitting ? 'ログイン中...' : 'ログイン'}
-        </Button>
-      </form>
-
-      <p className="text-sm text-gray-500 mt-6 text-center">
-        アカウントをお持ちでない方は{' '}
-        <Link href="/register" className="text-gray-900 font-medium underline hover:text-gray-600">
-          新規登録
-        </Link>
+      <p className="text-xs text-gray-400 mt-6">
+        ログインにはメールアドレスへの認証コード送信などが使われます。
       </p>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div className="max-w-md mx-auto px-4 py-16 text-gray-400">読み込み中...</div>}>
-      <LoginForm />
-    </Suspense>
   );
 }

@@ -97,53 +97,45 @@ export type Cart = {
   };
 };
 
-// 顧客（ユーザー認証）用
-export type CustomerAccessToken = {
-  accessToken: string;
-  expiresAt: string;
-};
+/* =========================================================
+ * Customer Account API（新方式・OAuth2）用の型
+ * Storefront APIとはスキーマが異なる（emailAddressがオブジェクト等）
+ * ======================================================= */
 
-// Shopifyのバリデーションエラー
-export type CustomerUserError = {
-  code: string | null;
-  field: string[] | null;
-  message: string;
-};
-
-// 注文の明細1行
-export type OrderLineItem = {
-  title: string;
+// 注文の明細1行（Customer Account APIのLineItem）
+export type AccountLineItem = {
+  name: string;
   quantity: number;
-  variant: {
-    image: ProductImage | null;
-    price: Money;
-    product: {
-      handle: string;
-    } | null;
-  } | null;
+  image: ProductImage | null;
+  totalPrice: Money | null;
 };
 
-// 注文1件
-export type Order = {
+// 注文1件（Customer Account APIのOrder）
+export type AccountOrder = {
   id: string;
-  orderNumber: number;
+  name: string; // 表示用の注文番号（例: #1001）
+  number: number;
   processedAt: string;
   financialStatus: string | null;
   fulfillmentStatus: string;
   totalPrice: Money;
   lineItems: {
-    edges: Array<{ node: OrderLineItem }>;
+    nodes: AccountLineItem[];
   };
 };
 
-// 顧客情報（注文履歴含む）
-export type Customer = {
-  id: string;
+// 顧客情報（注文履歴含む）。APIの入れ子を平坦化した後の形
+export type AccountCustomer = {
   firstName: string | null;
   lastName: string | null;
   email: string | null;
-  phone: string | null;
-  orders: {
-    edges: Array<{ node: Order }>;
-  };
+  orders: AccountOrder[];
+};
+
+// OAuthトークン交換のレスポンス
+export type TokenSet = {
+  access_token: string;
+  expires_in: number;
+  id_token?: string;
+  refresh_token: string;
 };

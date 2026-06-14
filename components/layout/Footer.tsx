@@ -30,7 +30,7 @@ export default function Footer() {
             {COLLECTIONS.map((c) => (
               <li key={c.handle}>
                 <Link href={`/collections/${c.handle}`} className="hover:text-white transition-colors">
-                  {c.emoji} {c.title}
+                  {c.title}
                 </Link>
               </li>
             ))}

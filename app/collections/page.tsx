@@ -14,7 +14,6 @@ export default function CollectionsPage() {
             href={`/collections/${collection.handle}`}
             className="group block bg-gray-50 rounded-2xl p-8 hover:bg-gray-900 transition-colors duration-300"
           >
-            <p className="text-5xl mb-4">{collection.emoji}</p>
             <h2 className="text-lg font-bold text-gray-900 group-hover:text-white transition-colors mb-2">
               {collection.title}
             </h2>

@@ -27,7 +27,6 @@ export default async function CollectionPage({ params }: Props) {
           ← コレクション一覧
         </Link>
         <div className="mt-4 flex items-center gap-3">
-          <span className="text-4xl">{collection.emoji}</span>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{collection.title}</h1>
             <p className="text-sm text-gray-500 mt-1">{collection.description}</p>
@@ -45,7 +44,6 @@ export default async function CollectionPage({ params }: Props) {
         </div>
       ) : (
         <div className="text-center py-24 text-gray-400">
-          <p className="text-6xl mb-4">{collection.emoji}</p>
           <p className="text-lg">現在この商品はありません</p>
         </div>
       )}

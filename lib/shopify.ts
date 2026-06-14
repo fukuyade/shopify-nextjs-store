@@ -4,9 +4,6 @@ import {
   ProductDetail,
   ProductDetailResponse,
   Cart,
-  Customer,
-  CustomerAccessToken,
-  CustomerUserError,
 } from '@/types';
 
 const domain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN!;
@@ -96,7 +93,7 @@ const SEARCH_PRODUCTS_QUERY = `
 
 export async function searchProducts(keyword: string, count = 24): Promise<Product[]> {
   if (!keyword.trim()) return [];
-  const query = `title:*${keyword}* OR tag:${keyword} OR product_type:${keyword}`;
+  const query = `title:*${keyword}* OR tag:${keyword}`;
   const response: ProductsResponse = await shopifyFetch(SEARCH_PRODUCTS_QUERY, {
     query,
     first: count,
@@ -326,153 +323,4 @@ export async function removeCartLine(cartId: string, lineId: string): Promise<Ca
     lineIds: [lineId],
   });
   return response.data.cartLinesRemove.cart;
-}
-
-/* =========================================================
- * ユーザー認証（Shopify Customer / Storefront API）
- * - 新規登録・ログイン・ログアウト・顧客情報＋注文履歴取得
- * - ログインで得たアクセストークンで顧客情報を取得する仕組み
- * ======================================================= */
-
-// 認証系のミューテーション結果（成功時のデータ or エラー）
-type AuthResult<T> = {
-  data: T | null;
-  errors: CustomerUserError[];
-};
-
-// 新規アカウント作成
-const CUSTOMER_CREATE_MUTATION = `
-  mutation CustomerCreate($input: CustomerCreateInput!) {
-    customerCreate(input: $input) {
-      customer {
-        id
-        email
-      }
-      customerUserErrors {
-        code
-        field
-        message
-      }
-    }
-  }
-`;
-
-export async function customerCreate(input: {
-  email: string;
-  password: string;
-  firstName?: string;
-  lastName?: string;
-}): Promise<AuthResult<{ id: string; email: string }>> {
-  const response = await shopifyFetch(CUSTOMER_CREATE_MUTATION, { input });
-  const result = response.data.customerCreate;
-  return {
-    data: result.customer,
-    errors: result.customerUserErrors ?? [],
-  };
-}
-
-// ログイン（アクセストークンを発行）
-const CUSTOMER_ACCESS_TOKEN_CREATE_MUTATION = `
-  mutation CustomerAccessTokenCreate($input: CustomerAccessTokenCreateInput!) {
-    customerAccessTokenCreate(input: $input) {
-      customerAccessToken {
-        accessToken
-        expiresAt
-      }
-      customerUserErrors {
-        code
-        field
-        message
-      }
-    }
-  }
-`;
-
-export async function customerAccessTokenCreate(
-  email: string,
-  password: string
-): Promise<AuthResult<CustomerAccessToken>> {
-  const response = await shopifyFetch(CUSTOMER_ACCESS_TOKEN_CREATE_MUTATION, {
-    input: { email, password },
-  });
-  const result = response.data.customerAccessTokenCreate;
-  return {
-    data: result.customerAccessToken,
-    errors: result.customerUserErrors ?? [],
-  };
-}
-
-// ログアウト（アクセストークンを無効化）
-const CUSTOMER_ACCESS_TOKEN_DELETE_MUTATION = `
-  mutation CustomerAccessTokenDelete($customerAccessToken: String!) {
-    customerAccessTokenDelete(customerAccessToken: $customerAccessToken) {
-      deletedAccessToken
-      userErrors {
-        field
-        message
-      }
-    }
-  }
-`;
-
-export async function customerAccessTokenDelete(accessToken: string): Promise<void> {
-  await shopifyFetch(CUSTOMER_ACCESS_TOKEN_DELETE_MUTATION, {
-    customerAccessToken: accessToken,
-  });
-}
-
-// 顧客情報＋注文履歴を取得（アクセストークンが必要）
-const CUSTOMER_QUERY = `
-  query GetCustomer($customerAccessToken: String!) {
-    customer(customerAccessToken: $customerAccessToken) {
-      id
-      firstName
-      lastName
-      email
-      phone
-      orders(first: 50, sortKey: PROCESSED_AT, reverse: true) {
-        edges {
-          node {
-            id
-            orderNumber
-            processedAt
-            financialStatus
-            fulfillmentStatus
-            totalPrice {
-              amount
-              currencyCode
-            }
-            lineItems(first: 50) {
-              edges {
-                node {
-                  title
-                  quantity
-                  variant {
-                    image {
-                      url
-                      altText
-                    }
-                    price {
-                      amount
-                      currencyCode
-                    }
-                    product {
-                      handle
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-export async function getCustomer(accessToken: string): Promise<Customer | null> {
-  const response = await shopifyFetch(CUSTOMER_QUERY, {
-    customerAccessToken: accessToken,
-  });
-  return response.data?.customer ?? null;
 }

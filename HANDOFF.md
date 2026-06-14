@@ -31,7 +31,15 @@ fukuさんがNext.js・Reactを学習するために構築しているShopifyス
 ```
 NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN=fuku-dev-store.myshopify.com
 NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN=f6668151e89bdb388630fdda20ba7572
+
+# Customer Account API（新方式・OAuth2）
+SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_ID=（Headlessチャネルで取得）
+SHOPIFY_CUSTOMER_ACCOUNT_CLIENT_SECRET=（Headlessチャネルで取得）
+SHOPIFY_CUSTOMER_ACCOUNT_REDIRECT_URI=https://<Vercel>.vercel.app/api/auth/callback
+APP_BASE_URL=https://<Vercel>.vercel.app
 ```
+
+**注意**: `SHOPIFY_CUSTOMER_ACCOUNT_*` と `APP_BASE_URL` はVercelのEnvironment Variablesにも同じ値を登録すること。`.env*` はgitignore済みなのでコミットされない。
 
 ---
 
@@ -46,10 +54,17 @@ app/
   collections/page.tsx          # コレクション一覧
   collections/[handle]/page.tsx # コレクション別商品一覧
   search/page.tsx               # 検索結果ページ
+  login/page.tsx                # ログイン入口（Shopifyホスト型ログインへ）
+  register/page.tsx             # /login へリダイレクト（新規登録もShopify側で）
+  account/page.tsx              # アカウント・注文履歴（サーバーComponent・要ログイン）
+  api/auth/login/route.ts       # 認可URLを生成しShopifyへリダイレクト
+  api/auth/callback/route.ts    # code→トークン交換しCookie保存
+  api/auth/logout/route.ts      # Cookie削除＋Shopifyセッション終了
+  api/auth/refresh/route.ts     # リフレッシュトークンで再発行
 
 components/
   layout/
-    Header.tsx    # 検索バー・ハンバーガーメニュー・カートアイコン
+    Header.tsx    # 検索バー・ハンバーガーメニュー・カート/アカウントアイコン
     Footer.tsx    # コレクションリンク・サポートリンク
   sections/
     HeroSection.tsx          # トップのヒーロー画像エリア
@@ -58,16 +73,21 @@ components/
     ProductDetailSection.tsx # 商品詳細（画像・バリアント・カート追加）
     CartSection.tsx          # カート内容（個数変更・削除・チェックアウト）
     SearchResultsSection.tsx # 検索結果表示
+    AccountView.tsx          # アカウント情報・注文履歴・ログアウト（サーバーComponent）
+    AccountSection.tsx       # 旧名。AccountView を再エクスポートするだけ
   ui/
     Button.tsx      # 共通ボタン（primary/secondary/outline）
     ProductCard.tsx # 商品カード
 
 lib/
-  shopify.ts      # Shopify Storefront API 通信（全GraphQL関数）
-  collections.ts  # コレクション定義（handle・tag・説明）
+  shopify.ts          # Shopify Storefront API 通信（商品・カート）
+  customer-account.ts # Customer Account API（OAuth2・トークン交換・顧客/注文取得）
+  auth-cookies.ts     # 認証Cookieの名前・set/clearヘルパー
+  collections.ts      # コレクション定義（handle・tag・説明）
 
 context/
   CartContext.tsx  # カート状態管理（localStorage永続化）
+  AuthContext.tsx  # ログイン表示状態のみ（読み取り可能Cookie cust_logged_in を参照）
 
 types/
   index.ts  # TypeScript型定義
@@ -75,7 +95,7 @@ types/
 
 ---
 
-## lib/shopify.ts の主な関数
+## lib/shopify.ts の主な関数（商品・カート）
 
 | 関数 | 用途 |
 |---|---|
@@ -88,6 +108,16 @@ types/
 | `getCart(cartId)` | カート復元（ページ更新後） |
 | `updateCartLine(cartId, lineId, quantity)` | 個数変更 |
 | `removeCartLine(cartId, lineId)` | 商品削除 |
+
+## lib/customer-account.ts の主な関数（認証・Customer Account API）
+
+| 関数 | 用途 |
+|---|---|
+| `buildAuthorizationUrl(state, nonce)` | Shopifyログインへの認可URL生成 |
+| `exchangeCodeForToken(code)` | 認可コード→アクセストークン交換 |
+| `refreshAccessToken(refreshToken)` | アクセストークン再発行 |
+| `buildLogoutUrl(idToken)` | Shopifyセッション終了URL生成 |
+| `getCustomerWithOrders(accessToken)` | 顧客情報＋注文履歴の取得（GraphQL） |
 
 ---
 
@@ -115,6 +145,9 @@ types/
 - [x] コレクションページ（カテゴリ別一覧）
 - [x] レスポンシブ対応（ハンバーガーメニュー）
 - [x] Vercelデプロイ（公開URL）
+- [x] ユーザー認証（Customer Account API / OAuth2・Confidentialクライアント）
+- [x] 注文履歴ページ（サーバーComponentでトークン取得・未ログインはログインへ）
+- [x] httpOnly Cookieでトークン管理・自動リフレッシュ・Headerアカウントアイコン
 
 ---
 
@@ -133,12 +166,40 @@ types/
 
 ---
 
+## ユーザー認証（新方式）の仕組みとセットアップ
+
+ストアは新方式（`NEW_CUSTOMER_ACCOUNTS`）のため、Customer Account API（OAuth2）で実装。
+メール＋パスワードのフォームは廃止し、Shopifyホスト型ログインへリダイレクトする方式。
+
+### 認証フロー
+1. `/login` → `/api/auth/login`：state/nonce発行・Cookie保存 → Shopifyログインへ
+2. Shopifyで認証 → `/api/auth/callback?code=...`：state照合 → code→トークン交換 → httpOnly Cookie保存
+3. `/account`（サーバーComponent）：Cookieのアクセストークンで Customer Account API を呼び注文取得
+4. トークン失効時：`/api/auth/refresh` がリフレッシュトークンで再発行
+5. `/api/auth/logout`：Cookie削除＋Shopifyの `end_session_endpoint` でセッション終了
+
+### Shopify側セットアップ（これをやらないと動かない）
+1. Shopify管理画面 → **Apps and sales channels → Shopify App Store** で **Headless** チャネルをインストール
+2. Headlessチャネル → ストアフロントを作成 → **Customer Account API settings** を開く
+3. クライアント種別を **Confidential** にし、**Client ID** と **Client secret** をコピー
+4. Application setup に登録:
+   - **Callback URL(s)**: `https://<Vercel>.vercel.app/api/auth/callback`
+   - **JavaScript origins**: `https://<Vercel>.vercel.app`
+   - **Logout URL**: `https://<Vercel>.vercel.app`
+5. `.env.local` とVercelの環境変数に `SHOPIFY_CUSTOMER_ACCOUNT_*` と `APP_BASE_URL` を設定
+
+### 制約・確認方法
+- **localhostは不可**（Shopifyがリダイレクトに許可しない）。動作確認はVercelのデプロイ先で行う。
+- 確認手順: デプロイ後 `/login` → 「ログイン/新規登録に進む」 → Shopify画面でメール認証 → `/account` に注文履歴（注文が無ければ空表示）。
+
+---
+
 ## 今後やりたいこと（本番化に向けて）
 
 - [ ] Admin APIを使った商品管理機能（Next.js API Route + Admin APIトークン）
-- [ ] ユーザー認証（Shopify Customer API）
-- [ ] 注文履歴ページ
 - [ ] お気に入り機能
+- [ ] アカウント情報の編集（Customer Account API の customerUpdate ミューテーション）
+- [ ] 注文詳細ページ（注文単位の詳細表示）
 - [ ] README.mdの作成（ポートフォリオ向け説明文）
 - [ ] サマー商品の在庫設定
 - [ ] 商品画像の追加（現在はサマー商品に画像なし）
