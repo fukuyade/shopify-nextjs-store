@@ -128,7 +128,7 @@ types/
 ## lib/collections.ts のコレクション定義
 
 ```typescript
-{ handle: 'snowboard', tag: 'Winter',  title: 'スノーボード' }
+{ handle: 'snowboard', tag: 'Winter',  title: 'ウィンタースポーツ' }
 { handle: 'summer',    tag: 'Summer',  title: 'サマースポーツ' }
 { handle: 'water',     tag: 'Water',   title: 'ウォータースポーツ' }
 { handle: 'outdoor',   tag: 'Outdoor', title: 'アウトドア' }
@@ -155,6 +155,7 @@ types/
 - [x] 初回ログイン後の名前（姓・名）必須登録（customerUpdate）
 - [x] 電話番号（任意）を顧客メタフィールド custom.phone に保存（metafieldsSet）
 - [x] プロフィール編集ページ（/account/profile・後から名前/電話を編集可能）
+- [x] Heroバナーカルーセル（コレクション別バナーを5秒で自動スライド・public/banners/{handle}.jpg）
 
 ※ Customer Account APIには電話番号の専用mutationが無い（CustomerUpdateInputは姓名のみ、CustomerPhoneNumberは読み取り専用）。
 　 そのため公式の電話欄ではなく、顧客メタフィールド custom.phone として保存している。

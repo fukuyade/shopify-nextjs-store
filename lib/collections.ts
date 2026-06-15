@@ -8,9 +8,9 @@ export type Collection = {
 export const COLLECTIONS: Collection[] = [
   {
     handle: 'snowboard',
-    title: 'スノーボード',
+    title: 'ウィンタースポーツ',
     tag: 'Winter',
-    description: 'パウダーからパークまで対応するスノーボード全コレクション',
+    description: 'スノーボードをはじめ、冬のアクティビティを楽しむギア全コレクション',
   },
   {
     handle: 'summer',
