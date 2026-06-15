@@ -53,9 +53,13 @@ const PRODUCTS_BY_TAG_QUERY = `
   }
 `;
 
-export async function getProductsByTag(tag: string, count = 24): Promise<Product[]> {
+export async function getProductsByTag(tags: string[], count = 24): Promise<Product[]> {
+  if (tags.length === 0) return [];
+  // どれか1つでも一致すれば対象（OR検索）。
+  // 日本語タグやスペースを含むタグに対応するため、各タグを引用符で囲む。
+  const query = tags.map((t) => `tag:'${t}'`).join(' OR ');
   const response: ProductsResponse = await shopifyFetch(PRODUCTS_BY_TAG_QUERY, {
-    query: `tag:${tag}`,
+    query,
     first: count,
   });
   return response.data.products.edges.map((edge) => edge.node);

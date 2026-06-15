@@ -104,7 +104,7 @@ types/
 | `getProducts(count)` | 商品一覧取得 |
 | `getProductByHandle(handle)` | 商品詳細取得 |
 | `searchProducts(keyword)` | タイトル・タグで検索 |
-| `getProductsByTag(tag)` | タグで絞り込み（コレクション用） |
+| `getProductsByTag(tags)` | 複数タグのいずれか（OR）で絞り込み（コレクション用） |
 | `createCart(variantId, quantity)` | カート新規作成 |
 | `addToCart(cartId, variantId, quantity)` | カートに商品追加 |
 | `getCart(cartId)` | カート復元（ページ更新後） |
@@ -130,7 +130,7 @@ types/
 ```typescript
 { handle: 'snowboard', tag: 'Winter',  title: 'ウィンタースポーツ' }
 { handle: 'summer',    tag: 'Summer',  title: 'サマースポーツ' }
-{ handle: 'water',     tag: 'Water',   title: 'ウォータースポーツ' }
+{ handle: 'ball-sports', tag: 'Ball',  title: 'ボールスポーツ' }
 { handle: 'outdoor',   tag: 'Outdoor', title: 'アウトドア' }
 ```
 

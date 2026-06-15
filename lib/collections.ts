@@ -1,7 +1,7 @@
 export type Collection = {
   handle: string;  // URLに使う識別子
   title: string;   // 表示名
-  tag: string;     // Shopifyのタグ名
+  tags: string[];  // Shopify商品タグ（このうちどれか1つでも付いていれば表示＝OR検索）
   description: string;
 };
 
@@ -9,25 +9,25 @@ export const COLLECTIONS: Collection[] = [
   {
     handle: 'snowboard',
     title: 'ウィンタースポーツ',
-    tag: 'Winter',
+    tags: ['Winter','冬', 'Snowboard', 'スノーボード'],
     description: 'スノーボードをはじめ、冬のアクティビティを楽しむギア全コレクション',
   },
   {
     handle: 'summer',
     title: 'サマースポーツ',
-    tag: 'Summer',
+    tags: ['Summer', '夏', 'Surf', 'サーフ', 'Swim', '水着','water', 'ウォーター'],
     description: '夏のアクティビティを全力で楽しむためのギア一覧',
   },
   {
-    handle: 'water',
-    title: 'ウォータースポーツ',
-    tag: 'Water',
-    description: 'サーフィン・SUP・カヤックなど水上スポーツ用品',
+    handle: 'ball-sports',
+    title: 'ボールスポーツ',
+    tags: ['Ball', 'ボール', '球技'],
+    description: 'サッカー・バスケ・テニスなどボールスポーツ用品',
   },
   {
     handle: 'outdoor',
     title: 'アウトドア',
-    tag: 'Outdoor',
+    tags: ['Outdoor','アウトドア', 'Camping', 'キャンプ', 'Hiking', 'ハイキング', 'Climbing', 'クライミング', 'Trekking', 'トレッキング'],
     description: '登山・キャンプ・トレッキングに最適なアウトドアギア',
   },
 ];
