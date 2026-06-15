@@ -43,7 +43,9 @@ export default function ProfileForm({
       if (res.ok && data.ok) {
         // 電話の保存だけ失敗した場合は知らせつつ名前は保存済み
         if (data.phoneSaved === false) {
-          setError('お名前は保存しましたが、電話番号の保存に失敗しました。時間をおいて再度お試しください。');
+          setError(
+            `お名前は保存しましたが、電話番号の保存に失敗しました。${data.phoneMessage ? `（${data.phoneMessage}）` : ''}`
+          );
           setSubmitting(false);
           return;
         }

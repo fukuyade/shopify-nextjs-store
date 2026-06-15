@@ -33,11 +33,13 @@ export async function POST(req: NextRequest) {
     // 電話番号（任意）が入力されていればメタフィールドに保存。
     // 失敗しても名前は保存済みなので、致命的扱いにはしない。
     let phoneSaved = true;
+    let phoneMessage: string | undefined;
     if (phone) {
       const phoneResult = await setCustomerPhone(token, phone);
       phoneSaved = phoneResult.ok;
+      if (!phoneResult.ok) phoneMessage = phoneResult.message;
     }
-    return NextResponse.json({ ok: true, phoneSaved }, { status: 200 });
+    return NextResponse.json({ ok: true, phoneSaved, phoneMessage }, { status: 200 });
   } catch (e) {
     if (e instanceof UnauthorizedError) {
       return NextResponse.json(
