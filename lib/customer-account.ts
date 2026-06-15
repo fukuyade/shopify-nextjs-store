@@ -239,6 +239,69 @@ export async function getCustomerWithOrders(accessToken: string): Promise<Accoun
   };
 }
 
+// ---- 顧客の名前を更新（customerUpdate） ----
+
+const CUSTOMER_UPDATE_MUTATION = `
+  mutation CustomerUpdate($input: CustomerUpdateInput!) {
+    customerUpdate(input: $input) {
+      customer {
+        firstName
+        lastName
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+type UpdateNameResult = { ok: true } | { ok: false; message: string };
+
+// firstName / lastName を保存。Customer Account APIのcustomerUpdateを使用。
+export async function updateCustomerName(
+  accessToken: string,
+  firstName: string,
+  lastName: string
+): Promise<UpdateNameResult> {
+  const endpoint = await getGraphqlEndpoint();
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: accessToken,
+      'User-Agent': 'fuku-dev-store-nextjs',
+    },
+    body: JSON.stringify({
+      query: CUSTOMER_UPDATE_MUTATION,
+      variables: { input: { firstName, lastName } },
+    }),
+    cache: 'no-store',
+  });
+
+  if (res.status === 401) {
+    throw new UnauthorizedError();
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`customerUpdate error: ${res.status} ${text}`);
+  }
+
+  const json = (await res.json()) as {
+    data?: { customerUpdate?: { userErrors: Array<{ message: string }> } };
+    errors?: Array<{ message: string }>;
+  };
+
+  if (json.errors?.length) {
+    return { ok: false, message: json.errors[0].message };
+  }
+  const userErrors = json.data?.customerUpdate?.userErrors;
+  if (userErrors?.length) {
+    return { ok: false, message: userErrors[0].message };
+  }
+  return { ok: true };
+}
+
 // トークン失効を表す専用エラー
 export class UnauthorizedError extends Error {
   constructor() {

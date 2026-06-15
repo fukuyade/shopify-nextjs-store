@@ -25,6 +25,10 @@ export default async function AccountPage() {
 
   try {
     const customer = await getCustomerWithOrders(accessToken);
+    // 初回ログインなどで名前が未登録なら、プロフィール入力を必須化
+    if (!customer.firstName || !customer.lastName) {
+      redirect('/account/profile');
+    }
     return <AccountView customer={customer} />;
   } catch (e) {
     // トークン失効 → リフレッシュして戻す

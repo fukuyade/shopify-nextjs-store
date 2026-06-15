@@ -57,6 +57,8 @@ app/
   login/page.tsx                # ログイン入口（Shopifyホスト型ログインへ）
   register/page.tsx             # /login へリダイレクト（新規登録もShopify側で）
   account/page.tsx              # アカウント・注文履歴（サーバーComponent・要ログイン）
+  account/profile/page.tsx      # 名前登録ページ（初回ログイン後に必須）
+  api/account/profile/route.ts  # 名前を更新（customerUpdate）
   api/auth/login/route.ts       # 認可URLを生成しShopifyへリダイレクト
   api/auth/callback/route.ts    # code→トークン交換しCookie保存
   api/auth/logout/route.ts      # Cookie削除＋Shopifyセッション終了
@@ -118,6 +120,7 @@ types/
 | `refreshAccessToken(refreshToken)` | アクセストークン再発行 |
 | `buildLogoutUrl(idToken)` | Shopifyセッション終了URL生成 |
 | `getCustomerWithOrders(accessToken)` | 顧客情報＋注文履歴の取得（GraphQL） |
+| `updateCustomerName(accessToken, firstName, lastName)` | 名前の保存（customerUpdate） |
 
 ---
 
@@ -148,6 +151,9 @@ types/
 - [x] ユーザー認証（Customer Account API / OAuth2・Confidentialクライアント）
 - [x] 注文履歴ページ（サーバーComponentでトークン取得・未ログインはログインへ）
 - [x] httpOnly Cookieでトークン管理・自動リフレッシュ・Headerアカウントアイコン
+- [x] 初回ログイン後の名前（姓・名）必須登録（customerUpdate）
+
+※ 電話番号は新方式ではSMS認証フロー（customerPhoneNumberCreate等）が必要なため未実装。
 
 ---
 
