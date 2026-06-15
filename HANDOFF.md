@@ -121,6 +121,7 @@ types/
 | `buildLogoutUrl(idToken)` | Shopifyセッション終了URL生成 |
 | `getCustomerWithOrders(accessToken)` | 顧客情報＋注文履歴の取得（GraphQL） |
 | `updateCustomerName(accessToken, firstName, lastName)` | 名前の保存（customerUpdate） |
+| `setCustomerPhone(accessToken, phone)` | 電話番号を顧客メタフィールド custom.phone に保存（metafieldsSet） |
 
 ---
 
@@ -152,8 +153,12 @@ types/
 - [x] 注文履歴ページ（サーバーComponentでトークン取得・未ログインはログインへ）
 - [x] httpOnly Cookieでトークン管理・自動リフレッシュ・Headerアカウントアイコン
 - [x] 初回ログイン後の名前（姓・名）必須登録（customerUpdate）
+- [x] 電話番号（任意）を顧客メタフィールド custom.phone に保存（metafieldsSet）
+- [x] プロフィール編集ページ（/account/profile・後から名前/電話を編集可能）
 
-※ 電話番号は新方式ではSMS認証フロー（customerPhoneNumberCreate等）が必要なため未実装。
+※ Customer Account APIには電話番号の専用mutationが無い（CustomerUpdateInputは姓名のみ、CustomerPhoneNumberは読み取り専用）。
+　 そのため公式の電話欄ではなく、顧客メタフィールド custom.phone として保存している。
+　 注: ストアに custom.phone のメタフィールド定義（顧客リソース・顧客アクセスRead/Write）が必要な場合がある。
 
 ---
 

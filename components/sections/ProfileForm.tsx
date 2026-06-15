@@ -9,13 +9,16 @@ import { useRouter } from 'next/navigation';
 export default function ProfileForm({
   initialLastName,
   initialFirstName,
+  initialPhone,
 }: {
   initialLastName: string;
   initialFirstName: string;
+  initialPhone: string;
 }) {
   const router = useRouter();
   const [lastName, setLastName] = useState(initialLastName);
   const [firstName, setFirstName] = useState(initialFirstName);
+  const [phone, setPhone] = useState(initialPhone);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -33,11 +36,17 @@ export default function ProfileForm({
       const res = await fetch('/api/account/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lastName, firstName }),
+        body: JSON.stringify({ lastName, firstName, phone }),
       });
       const data = await res.json();
 
       if (res.ok && data.ok) {
+        // 電話の保存だけ失敗した場合は知らせつつ名前は保存済み
+        if (data.phoneSaved === false) {
+          setError('お名前は保存しましたが、電話番号の保存に失敗しました。時間をおいて再度お試しください。');
+          setSubmitting(false);
+          return;
+        }
         router.replace('/account');
         router.refresh();
       } else if (res.status === 401) {
@@ -54,9 +63,9 @@ export default function ProfileForm({
 
   return (
     <div className="max-w-md mx-auto px-4 py-16">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">お名前の登録</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">プロフィール</h1>
       <p className="text-sm text-gray-500 mb-8">
-        ご利用を続けるには、お名前の登録をお願いします。
+        お名前（必須）と電話番号（任意）を登録・編集できます。
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -89,6 +98,20 @@ export default function ProfileForm({
               placeholder="太郎"
             />
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            電話番号 <span className="text-gray-400">（任意）</span>
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 transition-colors"
+            placeholder="090-1234-5678"
+          />
         </div>
 
         {error && (

@@ -154,6 +154,9 @@ const CUSTOMER_QUERY = `
       emailAddress {
         emailAddress
       }
+      phoneMetafield: metafield(namespace: "custom", key: "phone") {
+        value
+      }
       orders(first: 50, sortKey: PROCESSED_AT, reverse: true) {
         nodes {
           id
@@ -193,6 +196,7 @@ type RawCustomerResponse = {
       firstName: string | null;
       lastName: string | null;
       emailAddress: { emailAddress: string | null } | null;
+      phoneMetafield: { value: string | null } | null;
       orders: { nodes: AccountOrder[] };
     } | null;
   };
@@ -235,6 +239,7 @@ export async function getCustomerWithOrders(accessToken: string): Promise<Accoun
     firstName: c.firstName,
     lastName: c.lastName,
     email: c.emailAddress?.emailAddress ?? null,
+    phone: c.phoneMetafield?.value ?? null,
     orders: c.orders.nodes,
   };
 }
@@ -299,6 +304,79 @@ export async function updateCustomerName(
   if (userErrors?.length) {
     return { ok: false, message: userErrors[0].message };
   }
+  return { ok: true };
+}
+
+// ---- 電話番号を顧客メタフィールド（custom.phone）に保存 ----
+// Customer Account APIには電話更新のmutationが無いため、メタフィールドで保持する。
+
+const GET_CUSTOMER_ID_QUERY = `query { customer { id } }`;
+
+const METAFIELDS_SET_MUTATION = `
+  mutation SetCustomerMetafields($metafields: [MetafieldsSetInput!]!) {
+    metafieldsSet(metafields: $metafields) {
+      metafields { key value }
+      userErrors { field message }
+    }
+  }
+`;
+
+export async function setCustomerPhone(
+  accessToken: string,
+  phone: string
+): Promise<UpdateNameResult> {
+  const endpoint = await getGraphqlEndpoint();
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: accessToken,
+    'User-Agent': 'fuku-dev-store-nextjs',
+  };
+
+  // 1. metafieldsSet には ownerId（顧客ID）が必要なので先に取得
+  const idRes = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ query: GET_CUSTOMER_ID_QUERY }),
+    cache: 'no-store',
+  });
+  if (idRes.status === 401) throw new UnauthorizedError();
+  if (!idRes.ok) throw new Error(`customer id fetch error: ${idRes.status}`);
+  const idJson = (await idRes.json()) as { data?: { customer?: { id: string } } };
+  const ownerId = idJson.data?.customer?.id;
+  if (!ownerId) return { ok: false, message: '顧客IDを取得できませんでした。' };
+
+  // 2. メタフィールドを保存
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      query: METAFIELDS_SET_MUTATION,
+      variables: {
+        metafields: [
+          {
+            ownerId,
+            namespace: 'custom',
+            key: 'phone',
+            type: 'single_line_text_field',
+            value: phone,
+          },
+        ],
+      },
+    }),
+    cache: 'no-store',
+  });
+  if (res.status === 401) throw new UnauthorizedError();
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`metafieldsSet error: ${res.status} ${text}`);
+  }
+  const json = (await res.json()) as {
+    data?: { metafieldsSet?: { userErrors: Array<{ message: string }> } };
+    errors?: Array<{ message: string }>;
+  };
+  if (json.errors?.length) return { ok: false, message: json.errors[0].message };
+  const userErrors = json.data?.metafieldsSet?.userErrors;
+  if (userErrors?.length) return { ok: false, message: userErrors[0].message };
   return { ok: true };
 }
 

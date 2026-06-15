@@ -121,14 +121,23 @@ export default function AccountView({ customer }: { customer: AccountCustomer })
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{displayName} さん</h1>
           {customer.email && <p className="text-sm text-gray-500 mt-1">{customer.email}</p>}
+          {customer.phone && <p className="text-sm text-gray-500 mt-0.5">{customer.phone}</p>}
         </div>
-        {/* route handlerへの通常リンク */}
-        <a
-          href="/api/auth/logout"
-          className="inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium border border-gray-900 text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap"
-        >
-          ログアウト
-        </a>
+        <div className="flex flex-col items-end gap-2">
+          <Link
+            href="/account/profile"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium border border-gray-900 text-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap"
+          >
+            プロフィールを編集
+          </Link>
+          {/* route handlerへの通常リンク */}
+          <a
+            href="/api/auth/logout"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap text-sm"
+          >
+            ログアウト
+          </a>
+        </div>
       </div>
 
       {/* 注文履歴 */}

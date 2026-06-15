@@ -31,15 +31,12 @@ export default async function ProfilePage() {
     throw e;
   }
 
-  // すでに姓名が登録済みならアカウントへ戻す（このページは初回登録専用）
-  if (customer.firstName && customer.lastName) {
-    redirect('/account');
-  }
-
+  // 初回登録（名前未入力）でも、後からの編集でも使えるページ
   return (
     <ProfileForm
       initialLastName={customer.lastName ?? ''}
       initialFirstName={customer.firstName ?? ''}
+      initialPhone={customer.phone ?? ''}
     />
   );
 }

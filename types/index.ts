@@ -129,6 +129,7 @@ export type AccountCustomer = {
   firstName: string | null;
   lastName: string | null;
   email: string | null;
+  phone: string | null; // 顧客メタフィールド custom.phone に保存
   orders: AccountOrder[];
 };
 
