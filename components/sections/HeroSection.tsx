@@ -9,7 +9,7 @@ import { COLLECTIONS } from '@/lib/collections';
 const SLIDE_INTERVAL = 5000;
 
 // バナー画像は public/banners/{handle}.jpg に置く
-// 例: public/banners/snowboard.jpg, summer.jpg, water.jpg, outdoor.jpg
+// 例: snowboard.jpg, summer.jpg, ball-sports.jpg, outdoor.jpg
 function bannerSrc(handle: string): string {
   return `/banners/${handle}.jpg`;
 }
