@@ -2,6 +2,8 @@ import { getProducts, getProductsByTag } from '@/lib/shopify';
 import { COLLECTIONS } from '@/lib/collections';
 import HeroSection from '@/components/sections/HeroSection';
 import FeaturedSection from '@/components/sections/FeaturedSection';
+import CategoryTiles from '@/components/sections/CategoryTiles';
+import CollectionPreview from '@/components/sections/CollectionPreview';
 
 export default async function Home() {
   // おすすめ商品：Shopifyで「Featured」または「おすすめ」タグを付けた商品を表示。
@@ -10,22 +12,29 @@ export default async function Home() {
   const featuredByTag = await getProductsByTag(['Featured', 'おすすめ'], 12);
   const featured = featuredByTag.length > 0 ? featuredByTag : baseProducts.slice(0, 4);
 
-  // コレクションごとの商品（横スライドで表示）
+  // コレクションごとの商品（各10件まで。続きは「もっと見る」でコレクションページへ）
   const collectionRows = await Promise.all(
     COLLECTIONS.map(async (collection) => ({
       collection,
-      products: await getProductsByTag(collection.tags, 12),
+      products: await getProductsByTag(collection.tags, 10),
     }))
   );
 
   return (
     <>
       <HeroSection />
+      {/* Heroの下に人気カテゴリ */}
+      <CategoryTiles />
+      {/* おすすめ商品（横スライド） */}
       <FeaturedSection title="おすすめ商品" products={featured} />
-
-      {/* コレクションごとに横スライドで表示 */}
+      {/* コレクションごとにグリッド＋もっと見る */}
       {collectionRows.map(({ collection, products }) => (
-        <FeaturedSection key={collection.handle} title={collection.title} products={products} />
+        <CollectionPreview
+          key={collection.handle}
+          title={collection.title}
+          href={`/collections/${collection.handle}`}
+          products={products}
+        />
       ))}
     </>
   );
