@@ -4,7 +4,7 @@ import FeaturedSection from '@/components/sections/FeaturedSection';
 import ProductGridSection from '@/components/sections/ProductGridSection';
 
 export default async function Home() {
-  const products = await getProducts(12);
+  const products = await getProducts(100);
 
   // 先頭4件をおすすめとして使う
   const featured = products.slice(0, 4);
