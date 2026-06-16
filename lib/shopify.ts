@@ -56,8 +56,8 @@ const PRODUCTS_BY_TAG_QUERY = `
 export async function getProductsByTag(tags: string[], count = 24): Promise<Product[]> {
   if (tags.length === 0) return [];
   // どれか1つでも一致すれば対象（OR検索）。
-  // 日本語タグやスペースを含むタグに対応するため、各タグを引用符で囲む。
-  const query = tags.map((t) => `tag:'${t}'`).join(' OR ');
+  // Shopifyの検索構文は値をダブルクォートで囲む（日本語やスペースを含むタグにも対応）。
+  const query = tags.map((t) => `tag:"${t}"`).join(' OR ');
   const response: ProductsResponse = await shopifyFetch(PRODUCTS_BY_TAG_QUERY, {
     query,
     first: count,
