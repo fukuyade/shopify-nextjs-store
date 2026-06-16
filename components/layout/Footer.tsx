@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="col-span-2 md:col-span-1">
           <p className="text-white font-bold text-lg mb-2">MyStore</p>
           <p className="text-sm leading-relaxed">
-            スノーボードからサマースポーツまで、厳選されたアウトドアギアをお届けします。
+            スノーボードからテニスまで、厳選されたアウトドアギアをお届けします。
           </p>
         </div>
 
@@ -30,7 +30,7 @@ export default function Footer() {
             {COLLECTIONS.map((c) => (
               <li key={c.handle}>
                 <Link href={`/collections/${c.handle}`} className="hover:text-white transition-colors">
-                  {c.title}
+                 {c.title}
                 </Link>
               </li>
             ))}
