@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { COLLECTIONS } from '@/lib/collections';
 
 export default function CollectionsPage() {
@@ -12,17 +13,26 @@ export default function CollectionsPage() {
           <Link
             key={collection.handle}
             href={`/collections/${collection.handle}`}
-            className="group block bg-gray-50 rounded-2xl p-8 hover:bg-gray-900 transition-colors duration-300"
+            className="group relative block overflow-hidden rounded-2xl aspect-[3/4]"
           >
-            <h2 className="text-lg font-bold text-gray-900 group-hover:text-white transition-colors mb-2">
-              {collection.title}
-            </h2>
-            <p className="text-sm text-gray-500 group-hover:text-gray-300 transition-colors leading-relaxed">
-              {collection.description}
-            </p>
-            <p className="mt-4 text-sm font-medium text-gray-900 group-hover:text-white transition-colors">
-              見る →
-            </p>
+            {/* 背景写真は public/collections/{handle}.jpg */}
+            <Image
+              src={`/collections/${collection.handle}.jpg`}
+              alt={collection.title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* 文字を読みやすくする暗幕（下を濃く） */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+            {/* テキスト（左下） */}
+            <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+              <h2 className="text-lg font-bold drop-shadow-sm">{collection.title}</h2>
+              <p className="text-xs text-gray-200 mt-1 leading-relaxed line-clamp-2 drop-shadow-sm">
+                {collection.description}
+              </p>
+              <p className="mt-3 text-sm font-medium">見る →</p>
+            </div>
           </Link>
         ))}
       </div>

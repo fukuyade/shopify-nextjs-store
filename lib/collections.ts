@@ -16,13 +16,14 @@ export const COLLECTIONS: Collection[] = [
     handle: 'summer',
     title: 'サマースポーツ',
     tags: ['Summer', '夏', 'Surf', 'サーフ', 'Swim', '水着','water', 'ウォーター'],
-    description: '夏のアクティビティを全力で楽しむためのギア一覧',
+    description: '夏のアクティビティを全力で楽しむためのギア全コレクション',
   },
   {
     handle: 'ball-sports',
     title: 'ボールスポーツ',
     tags: ['Ball', 'ボール', '球技'],
     description: 'サッカー・バスケ・テニスなどボールスポーツ用品',
+    
   },
   {
     handle: 'outdoor',
