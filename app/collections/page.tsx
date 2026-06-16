@@ -13,7 +13,7 @@ export default function CollectionsPage() {
           <Link
             key={collection.handle}
             href={`/collections/${collection.handle}`}
-            className="group relative block overflow-hidden rounded-2xl aspect-[3/4]"
+            className="group relative block overflow-hidden rounded-2xl aspect-[4/3]"
           >
             {/* 背景写真は public/collections/{handle}.jpg */}
             <Image
@@ -31,7 +31,6 @@ export default function CollectionsPage() {
               <p className="text-xs text-gray-200 mt-1 leading-relaxed line-clamp-2 drop-shadow-sm">
                 {collection.description}
               </p>
-              <p className="mt-3 text-sm font-medium">見る →</p>
             </div>
           </Link>
         ))}
