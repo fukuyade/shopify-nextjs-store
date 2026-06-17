@@ -30,13 +30,13 @@ export const COLLECTIONS: Collection[] = [
     description: 'スノーボードをはじめ、冬のアクティビティを楽しむギア全コレクション',
     subcategories: [
       { handle: 'snowboard-board', title: 'スノーボード', tags: ['Snowboard', 'スノーボード'], subSubcategories: [
-        { handle: 'board', title: '板', tags: ['Board'] },
+        { handle: 'board', title: 'ボード', tags: ['Board'] },
         { handle: 'binding', title: 'ビンディング', tags: ['Binding'] },
         { handle: 'wear', title: 'ウェア', tags: ['Wear'] },
         { handle: 'acc', title: '小物', tags: ['Snow-Acc'] },
       ] },
       { handle: 'ski', title: 'スキー', tags: ['Ski', 'スキー'], subSubcategories: [
-        { handle: 'board', title: '板', tags: ['Ski-Board'] },
+        { handle: 'board', title: 'ボード', tags: ['Ski-Board'] },
         { handle: 'boots', title: 'ブーツ', tags: ['Boots'] },
         { handle: 'wear', title: 'ウェア', tags: ['Wear'] },
         { handle: 'acc', title: '小物', tags: ['Ski-Acc'] },
