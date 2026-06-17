@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { COLLECTIONS } from '@/lib/collections';
 
 function SearchForm() {
   const router = useRouter();
@@ -156,6 +157,36 @@ export default function Header() {
         </div>
       </div>
 
+      {/* カテゴリバー（PC・大分類にホバーで中分類を表示） */}
+      <div className="hidden md:block border-t border-gray-100 bg-white">
+        <div className="max-w-6xl mx-auto px-4 flex items-center gap-1">
+          {COLLECTIONS.map((c) => (
+            <div key={c.handle} className="relative group">
+              <Link
+                href={`/collections/${c.handle}`}
+                className="inline-flex items-center px-3 py-2.5 text-sm text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                {c.title}
+              </Link>
+              {/* 中分類ドロップダウン */}
+              <div className="absolute left-0 top-full hidden group-hover:block pt-1 z-50">
+                <div className="bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[180px]">
+                  {c.subcategories.map((sub) => (
+                    <Link
+                      key={sub.handle}
+                      href={`/collections/${c.handle}/${sub.handle}`}
+                      className="block px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                    >
+                      {sub.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* モバイルメニュー */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 flex flex-col gap-4">
@@ -190,6 +221,31 @@ export default function Header() {
               {isLoggedIn ? 'アカウント' : 'ログイン'}
             </Link>
           </nav>
+
+          {/* カテゴリ（大分類→中分類） */}
+          <div className="border-t border-gray-100 pt-3 flex flex-col gap-2">
+            {COLLECTIONS.map((c) => (
+              <div key={c.handle}>
+                <Link
+                  href={`/collections/${c.handle}`}
+                  className="block px-2 py-1.5 text-sm font-semibold text-gray-800 hover:bg-gray-50 rounded-lg"
+                >
+                  {c.title}
+                </Link>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 pl-4 py-1">
+                  {c.subcategories.map((sub) => (
+                    <Link
+                      key={sub.handle}
+                      href={`/collections/${c.handle}/${sub.handle}`}
+                      className="text-xs text-gray-500 hover:text-gray-900 py-0.5"
+                    >
+                      {sub.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </header>
