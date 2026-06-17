@@ -35,6 +35,21 @@ export default async function CollectionPage({ params }: Props) {
         <p className="text-sm text-gray-400 mt-4">{products.length}件の商品</p>
       </div>
 
+      {/* 中分類チップ（押すとその中分類ページへ） */}
+      {collection.subcategories.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-8">
+          {collection.subcategories.map((sub) => (
+            <Link
+              key={sub.handle}
+              href={`/collections/${collection.handle}/${sub.handle}`}
+              className="px-4 py-1.5 rounded-full border border-gray-300 text-sm text-gray-700 hover:border-gray-900 hover:bg-gray-900 hover:text-white transition-colors"
+            >
+              {sub.title}
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* 商品グリッド */}
       {products.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
