@@ -13,6 +13,7 @@ export type Product = {
   title: string;
   handle: string;
   description: string;
+  tags?: string[]; // 小分類フィルタ用（getProductsByTagでのみ取得）
   priceRange: {
     minVariantPrice: Money;
   };

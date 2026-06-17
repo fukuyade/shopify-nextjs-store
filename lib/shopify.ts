@@ -33,6 +33,7 @@ const PRODUCTS_BY_TAG_QUERY = `
           title
           handle
           description
+          tags
           priceRange {
             minVariantPrice {
               amount
@@ -75,6 +76,7 @@ const SEARCH_PRODUCTS_QUERY = `
           title
           handle
           description
+          tags
           priceRange {
             minVariantPrice {
               amount
@@ -115,6 +117,7 @@ const PRODUCTS_QUERY = `
           title
           handle
           description
+          tags
           priceRange {
             minVariantPrice {
               amount
