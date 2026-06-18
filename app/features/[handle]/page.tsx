@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getFeatureByHandle } from '@/lib/features';
 import { getProductsByTag, getNewestProducts } from '@/lib/shopify';
 import ProductCard from '@/components/ui/ProductCard';
+import FeatureBlocks, { ResolvedBlock } from '@/components/sections/FeatureBlocks';
 
 type Props = {
   params: Promise<{ handle: string }>;
@@ -14,7 +15,38 @@ export default async function FeaturePage({ params }: Props) {
 
   if (!feature) notFound();
 
-  // 種別ごとに商品を取得（新着＝作成日順 / それ以外＝タグでOR検索）
+  // 1) blocks がある特集 … ブロックを上から描画（作り込み型）
+  //    'products' ブロックだけサーバー側で商品を取得して埋め込む。
+  if (feature.blocks && feature.blocks.length > 0) {
+    const resolved: ResolvedBlock[] = await Promise.all(
+      feature.blocks.map(async (block): Promise<ResolvedBlock> => {
+        if (block.type === 'products') {
+          const products =
+            block.source === 'newest'
+              ? await getNewestProducts(block.limit ?? 12)
+              : await getProductsByTag(block.tags ?? [], block.limit ?? 12);
+          return { ...block, products };
+        }
+        return block;
+      })
+    );
+
+    return (
+      <section className="max-w-5xl mx-auto px-4 py-12">
+        <Link
+          href="/"
+          className="text-sm text-gray-400 hover:text-gray-900 transition-colors"
+        >
+          ← トップへ
+        </Link>
+        <div className="mt-6">
+          <FeatureBlocks blocks={resolved} />
+        </div>
+      </section>
+    );
+  }
+
+  // 2) blocks が無い特集 … 従来どおりの商品一覧（デフォルト）
   const products =
     feature.kind === 'newest'
       ? await getNewestProducts(24)
@@ -22,7 +54,6 @@ export default async function FeaturePage({ params }: Props) {
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-12">
-      {/* ヘッダー */}
       <div className="mb-10">
         <Link
           href="/"
@@ -40,7 +71,6 @@ export default async function FeaturePage({ params }: Props) {
         <p className="text-sm text-gray-400 mt-4">{products.length}件の商品</p>
       </div>
 
-      {/* 商品グリッド */}
       {products.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => (
