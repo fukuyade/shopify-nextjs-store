@@ -145,6 +145,44 @@ export async function getProducts(count = 12): Promise<Product[]> {
   return response.data.products.edges.map((edge) => edge.node);
 }
 
+// 新着商品取得（作成日の新しい順）。特集「新着アイテム」で使用。
+const NEWEST_PRODUCTS_QUERY = `
+  query GetNewestProducts($first: Int!) {
+    products(first: $first, sortKey: CREATED_AT, reverse: true) {
+      edges {
+        node {
+          id
+          title
+          handle
+          description
+          tags
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 1) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function getNewestProducts(count = 24): Promise<Product[]> {
+  const response: ProductsResponse = await shopifyFetch(NEWEST_PRODUCTS_QUERY, {
+    first: count,
+  });
+  return response.data.products.edges.map((edge) => edge.node);
+}
+
 // 商品詳細取得
 const PRODUCT_BY_HANDLE_QUERY = `
   query GetProductByHandle($handle: String!) {

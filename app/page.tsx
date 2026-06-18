@@ -2,7 +2,7 @@ import { getProducts, getProductsByTag } from '@/lib/shopify';
 import { COLLECTIONS } from '@/lib/collections';
 import HeroSection from '@/components/sections/HeroSection';
 import FeaturedSection from '@/components/sections/FeaturedSection';
-import CategoryTiles from '@/components/sections/CategoryTiles';
+import FeatureCards from '@/components/sections/FeatureCards';
 import CollectionPreview from '@/components/sections/CollectionPreview';
 
 export default async function Home() {
@@ -23,8 +23,8 @@ export default async function Home() {
   return (
     <>
       <HeroSection />
-      {/* Heroの下に人気カテゴリ */}
-      <CategoryTiles />
+      {/* Heroの下に特集（テーマ別の導線） */}
+      <FeatureCards />
       {/* おすすめ商品（横スライド） */}
       <FeaturedSection title="おすすめ商品" products={featured} />
       {/* コレクションごとにグリッド＋もっと見る */}
