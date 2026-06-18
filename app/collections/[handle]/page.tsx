@@ -20,13 +20,7 @@ export default async function CollectionPage({ params }: Props) {
     <section className="max-w-6xl mx-auto px-4 py-12">
       {/* ヘッダー */}
       <div className="mb-10">
-        <Link
-          href="/collections"
-          className="text-sm text-gray-400 hover:text-gray-900 transition-colors"
-        >
-          ← コレクション一覧
-        </Link>
-        <div className="mt-4 flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{collection.title}</h1>
             <p className="text-sm text-gray-500 mt-1">{collection.description}</p>

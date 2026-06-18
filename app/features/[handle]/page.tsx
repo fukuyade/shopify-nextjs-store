@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { getFeatureByHandle } from '@/lib/features';
 import { getProductsByTag, getNewestProducts } from '@/lib/shopify';
 import ProductCard from '@/components/ui/ProductCard';
@@ -33,15 +32,7 @@ export default async function FeaturePage({ params }: Props) {
 
     return (
       <section className="max-w-5xl mx-auto px-4 py-12">
-        <Link
-          href="/"
-          className="text-sm text-gray-400 hover:text-gray-900 transition-colors"
-        >
-          ← トップへ
-        </Link>
-        <div className="mt-6">
-          <FeatureBlocks blocks={resolved} />
-        </div>
+        <FeatureBlocks blocks={resolved} />
       </section>
     );
   }
@@ -55,13 +46,7 @@ export default async function FeaturePage({ params }: Props) {
   return (
     <section className="max-w-6xl mx-auto px-4 py-12">
       <div className="mb-10">
-        <Link
-          href="/"
-          className="text-sm text-gray-400 hover:text-gray-900 transition-colors"
-        >
-          ← トップへ
-        </Link>
-        <div className="mt-4">
+        <div>
           <span className="inline-block rounded-full bg-gray-900 px-3 py-1 text-xs font-bold text-white">
             特集
           </span>
