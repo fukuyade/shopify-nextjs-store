@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useFavorites } from '@/context/FavoritesContext';
 import { COLLECTIONS } from '@/lib/collections';
 
 function SearchForm() {
@@ -68,6 +69,7 @@ const NAV_LINKS = [
 export default function Header() {
   const { cart } = useCart();
   const { isLoggedIn } = useAuth();
+  const { count: favoriteCount } = useFavorites();
   const pathname = usePathname();
   const itemCount = cart?.totalQuantity ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
@@ -111,6 +113,22 @@ export default function Header() {
               </Link>
             ))}
           </nav>
+
+          {/* お気に入りアイコン */}
+          <Link
+            href="/favorites"
+            className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            aria-label="お気に入り"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            {favoriteCount > 0 && (
+              <span className="absolute top-0 right-0 bg-rose-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                {favoriteCount > 99 ? '99+' : favoriteCount}
+              </span>
+            )}
+          </Link>
 
           {/* カートアイコン */}
           <Link href="/cart" className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors">
@@ -210,6 +228,16 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/favorites"
+              className={`px-2 py-2.5 rounded-lg text-sm transition-colors ${
+                pathname === '/favorites'
+                  ? 'bg-gray-100 text-gray-900 font-semibold'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              お気に入り{favoriteCount > 0 ? `（${favoriteCount}）` : ''}
+            </Link>
             <Link
               href={isLoggedIn ? '/account' : '/login'}
               className={`px-2 py-2.5 rounded-lg text-sm transition-colors ${

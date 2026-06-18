@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ProductDetail, ProductVariant } from '@/types';
 import Button from '@/components/ui/Button';
+import FavoriteButton from '@/components/ui/FavoriteButton';
 import { useCart } from '@/context/CartContext';
 
 type Props = {
@@ -149,6 +150,20 @@ export default function ProductDetailSection({ product }: Props) {
               </Link>
             </div>
           )}
+
+          {/* お気に入り */}
+          <FavoriteButton
+            withLabel
+            className="w-full"
+            item={{
+              id: product.id,
+              handle: product.handle,
+              title: product.title,
+              image: images[0]?.url ?? null,
+              amount: product.priceRange.minVariantPrice.amount,
+              currencyCode: product.priceRange.minVariantPrice.currencyCode,
+            }}
+          />
 
           {/* 商品説明 */}
           {product.descriptionHtml ? (

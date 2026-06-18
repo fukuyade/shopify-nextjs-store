@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '@/types';
+import FavoriteButton from '@/components/ui/FavoriteButton';
 
 type Props = {
   product: Product;
@@ -35,6 +36,18 @@ export default function ProductCard({ product }: Props) {
               📦
             </div>
           )}
+          {/* お気に入りハート（画像右上） */}
+          <FavoriteButton
+            className="absolute top-2 right-2 z-10"
+            item={{
+              id: product.id,
+              handle: product.handle,
+              title: product.title,
+              image: image?.url ?? null,
+              amount: price.amount,
+              currencyCode: price.currencyCode,
+            }}
+          />
         </div>
 
         {/* 商品情報 */}
