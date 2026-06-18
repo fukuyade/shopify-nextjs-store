@@ -9,7 +9,7 @@ fukuさんがNext.js・Reactを学習するために構築しているShopifyス
 ポートフォリオ兼、将来的に実店舗でそのまま使えるレベルを目指している。
 
 - **GitHub**: https://github.com/fukuyade/shopify-nextjs-store
-- **Vercel（公開URL）**: デプロイ済み（Vercelダッシュボードで確認）
+- **Vercel（公開URL）**: https://shopify-nextjs-store.vercel.app
 - **Shopifyストア**: fuku-dev-store.myshopify.com
 
 ---
@@ -51,8 +51,9 @@ app/
   page.tsx                      # ホームページ
   cart/page.tsx                 # カートページ
   products/[handle]/page.tsx    # 商品詳細ページ
-  collections/page.tsx          # コレクション一覧
-  collections/[handle]/page.tsx # コレクション別商品一覧
+  collections/page.tsx          # 大分類カード一覧（背景写真つき）
+  collections/[handle]/page.tsx # 大分類ページ（中分類チップ＋商品一覧）
+  collections/[handle]/[sub]/page.tsx # 中分類ページ（小分類フィルタ＋商品）
   search/page.tsx               # 検索結果ページ
   login/page.tsx                # ログイン入口（Shopifyホスト型ログインへ）
   register/page.tsx             # /login へリダイレクト（新規登録もShopify側で）
@@ -66,26 +67,33 @@ app/
 
 components/
   layout/
-    Header.tsx    # 検索バー・ハンバーガーメニュー・カート/アカウントアイコン
+    Header.tsx    # 検索バー・カテゴリバー(大分類ホバーで中分類メガメニュー)・モバイルカテゴリ
     Footer.tsx    # コレクションリンク・サポートリンク
   sections/
-    HeroSection.tsx          # トップのヒーロー画像エリア
-    FeaturedSection.tsx      # 横スクロールカルーセル
-    ProductGridSection.tsx   # 商品グリッド一覧
+    HeroSection.tsx          # コレクション別バナーの自動スライド（クライアント）
+    CategoryTiles.tsx        # トップの人気カテゴリ（画像タイル）
+    CollectionPreview.tsx    # トップのコレクション別グリッド＋もっと見る
+    FeaturedSection.tsx      # おすすめ商品の横スクロールカルーセル
+    ProductGridSection.tsx   # 商品グリッド一覧（現在トップでは未使用）
     ProductDetailSection.tsx # 商品詳細（画像・バリアント・カート追加）
     CartSection.tsx          # カート内容（個数変更・削除・チェックアウト）
     SearchResultsSection.tsx # 検索結果表示
+    SubCategoryFilter.tsx    # 中分類ページの小分類チェックボックス（含める/除外・クライアント）
     AccountView.tsx          # アカウント情報・注文履歴・ログアウト（サーバーComponent）
     AccountSection.tsx       # 旧名。AccountView を再エクスポートするだけ
   ui/
     Button.tsx      # 共通ボタン（primary/secondary/outline）
     ProductCard.tsx # 商品カード
 
+public/
+  banners/{handle}.jpg      # Heroバナー画像（snowboard/summer/ball-sports/outdoor）
+  collections/{handle}.jpg  # コレクションカード・人気カテゴリ用の背景写真
+
 lib/
-  shopify.ts          # Shopify Storefront API 通信（商品・カート）
+  shopify.ts          # Shopify Storefront API 通信（商品・カート）。getProductsByTagは複数タグOR・ダブルクォート
   customer-account.ts # Customer Account API（OAuth2・トークン交換・顧客/注文取得）
   auth-cookies.ts     # 認証Cookieの名前・set/clearヘルパー
-  collections.ts      # コレクション定義（handle・tag・説明）
+  collections.ts      # カテゴリ定義（大分類→中分類→小分類の3階層・すべてタグ）※ユーザー管理
 
 context/
   CartContext.tsx  # カート状態管理（localStorage永続化）
@@ -125,16 +133,33 @@ types/
 
 ---
 
-## lib/collections.ts のコレクション定義
+## カテゴリ構造（lib/collections.ts・3階層すべてタグ）
+
+大分類（コレクション）→ 中分類 → 小分類の3階層。どの段も「商品タグでの絞り込み」で、`collections.ts` のデータ構造（入れ子）で表現している。
 
 ```typescript
-{ handle: 'snowboard', tag: 'Winter',  title: 'ウィンタースポーツ' }
-{ handle: 'summer',    tag: 'Summer',  title: 'サマースポーツ' }
-{ handle: 'ball-sports', tag: 'Ball',  title: 'ボールスポーツ' }
-{ handle: 'outdoor',   tag: 'Outdoor', title: 'アウトドア' }
+export type SubSubCategory = { handle; title; tags: string[] };          // 小分類
+export type SubCategory   = { handle; title; tags; subSubcategories? };  // 中分類
+export type Collection    = { handle; title; tags; description; subcategories }; // 大分類
 ```
 
-**注意**: `tag` はShopify商品タグの英語名と一致させる必要がある。
+大分類4つ（中分類）:
+- ウィンタースポーツ(snowboard) → スノーボード / スキー
+- サマースポーツ(summer) → サーフィン / SUP / シュノーケル / カヤック / スケート
+- ボールスポーツ(ball-sports) → テニス / バレー / 野球 / バスケットボール / サッカー
+- アウトドア(outdoor) → キャンプ / 登山・トレッキング / 自転車
+
+各中分類の下に小分類（例：ボード/ビンディング/ウェア/小物、ラケット/ボール/シューズ 等）。
+
+ページ:
+- `/collections` … 大分類カード（背景写真）
+- `/collections/[大分類]` … 中分類チップ＋商品
+- `/collections/[大分類]/[中分類]` … 小分類チェックボックス（含める/除外）＋商品
+
+**重要**:
+- タグはShopify商品タグと完全一致（OR検索）。日本語タグもOK。
+- `collections.ts` のタグは**ユーザー管理**。編集前に必ず読み、勝手に変えない・戻さない。
+- 小分類フィルタは商品の `tags` を使う → `Product` 型と `getProductsByTag` のクエリに `tags` を追加済み。
 
 ---
 
@@ -158,6 +183,10 @@ types/
 - [x] Heroバナーカルーセル（コレクション別バナーを5秒で自動スライド・public/banners/{handle}.jpg）
 - [x] おすすめ商品をタグで管理（`Featured` または `おすすめ` タグの商品を表示。無ければ先頭4件）
 - [x] コレクションカードに背景写真（public/collections/{handle}.jpg）
+- [x] トップをcoca風に刷新（Hero→人気カテゴリ→おすすめ→コレクション別グリッド＋もっと見る）
+- [x] 3階層カテゴリ（大分類→中分類→小分類・すべてタグ）
+- [x] 中分類ページ＋小分類チェックボックス絞り込み（含める/除外）
+- [x] Header大分類ホバーで中分類メガメニュー＋モバイルのカテゴリ一覧
 
 ※ Customer Account APIには電話番号の専用mutationが無い（CustomerUpdateInputは姓名のみ、CustomerPhoneNumberは読み取り専用）。
 　 そのため公式の電話欄ではなく、顧客メタフィールド custom.phone として保存している。
@@ -168,15 +197,21 @@ types/
 ## Shopifyデータの状態
 
 ### 商品データ
-- スノーボード商品：15点（日本語名・円価格設定済み）
-- サマースポーツ商品：15点（日本語名・英語handle設定済み）
-- 通貨：JPY
-- 在庫：サマー商品は在庫0（Shopify Adminで設定要）
+- 全カテゴリに商品あり（元の商品＋空カテゴリ用に19点をAPIで追加生成）。通貨：JPY。
+- 追加商品は大分類＋中分類＋小分類タグ・在庫・画像（大分類バナー流用）・公開済みで作成。
+- 既存商品にも小分類タグを一括付与済み（例：既存スノーボード→`Board`）。
+- 商品画像：追加商品はカテゴリ単位のバナー画像を流用（個別実物写真ではない）。
+
+### ⚠️ 最重要の教訓（ハマりどころ）
+- **Storefront APIは「公開された商品」しか返さない**。API/MCPで作った商品は未公開になりがち。
+  → Shopify管理画面 or API で「オンラインストア」＋「fuku-make-app」に**公開**が必要（このストアのStorefrontトークンはfuku-make-app/オンラインストアを読む）。
+- **タグ検索はダブルクォート** `tag:"値"`（シングルクォートだとStorefrontで一致しない）。
+- **Vercel環境変数は `.env.local` と別管理**。変更後は**Redeploy**。Customer Account APIは**localhost不可**→確認はVercelで。
+- ページは `revalidate: 60` のキャッシュ。商品/タグ変更の反映に最大1分＋ハードリロード。
+- 開発環境（Cowork）はファイル同期が不安定で、編集済みファイルがbash側で壊れて見えることがある。型チェックは `/tmp` に独立環境を作って `tsc` で確認する（実ファイルは正しい）。
 
 ### handleについての注意
-- スノーボード商品：英語タイトルで作成後に日本語化 → handleは英語のまま ✅
-- サマー商品：日本語タイトルで作成 → handleを手動で英語に修正済み ✅
-- **今後の商品追加時**：Shopify Admin「URLハンドル」欄で英語handleを手動設定すること
+- 商品追加時：Shopify Admin「URLハンドル」欄で英語handleを手動設定すること。
 
 ---
 
@@ -210,23 +245,34 @@ types/
 
 ## 今後やりたいこと（本番化に向けて）
 
-- [ ] Admin APIを使った商品管理機能（Next.js API Route + Admin APIトークン）
-- [ ] お気に入り機能
-- [ ] アカウント情報の編集（Customer Account API の customerUpdate ミューテーション）
-- [ ] 注文詳細ページ（注文単位の詳細表示）
+- [ ] 小分類フィルタの見た目調整、未分類商品（フリスビー等）の扱い
 - [ ] README.mdの作成（ポートフォリオ向け説明文）
-- [ ] サマー商品の在庫設定
-- [ ] 商品画像の追加（現在はサマー商品に画像なし）
+- [ ] 追加商品の個別実物写真への差し替え（現在はカテゴリバナー流用）
+- [ ] Shopifyのコレクション機能との比較・併用の検討
+- [ ] お気に入り機能
+- [ ] 注文詳細ページ（注文単位の詳細表示）
+- [ ] Admin APIを使った商品管理機能（Next.js API Route + Admin APIトークン）
 
 ---
 
 ## 学習スタイルの引き継ぎ
 
-- **進め方**: 実装してから解説（コードを先に書いて後で説明）
-- **Notionまとめ**: 各日の終わりにNotionにまとめる（1日目〜8日目まで作成済み）
-- **GitHub**: 実装完了のタイミングでpush
+- **進め方**: 実装してから解説（コードを先に書いて後で説明）。大きめの機能は**少しずつ確認→pushを繰り返す**。
+- **Notionまとめ**: 各日の終わりにNotionにまとめる（**1日目〜12日目まで作成済み**）。親「ポートフォリオ」ページID `3728e1b3-2203-8099-8b73-d3ec79af4fff`。
+- **GitHub**: pushは**ユーザーが自分のPCで実行**（Cowork側の同期が不安定なため）。
 - **コミットメッセージ形式**: `feat:` `fix:` `refactor:` `style:` `docs:` `chore:`
+- **collections.ts のタグはユーザー管理**: 編集前に必ず読み、勝手に変えない・戻さない。
+- **型チェック重視**: 編集後は独立環境（/tmp）で `tsc --noEmit` 確認。
 - **目標**: ポートフォリオとして提出できるレベル＋実店舗で使えるレベル
+
+---
+
+## 9〜12日目でやったこと（直近の作業サマリ）
+
+- **9日目**: ユーザー認証を新方式 Customer Account API（OAuth2・Confidential）に作り替え。
+- **10日目**: 初回ログイン後の名前（必須）登録＋電話（任意・メタフィールド `custom.phone`）。
+- **11日目**: Heroカルーセル、コレクション整理（ウィンター/Ball Sports/複数タグOR/ダブルクォート修正）、公開状態の修正、coca風トップ、おすすめ=Featuredタグ、カード背景写真。
+- **12日目**: 3階層カテゴリ（大/中/小）、中分類ページ、小分類フィルタ（含む/除外）、Headerメガメニュー、空カテゴリに商品生成＋既存商品の小分類タグ付与。
 
 ---
 
