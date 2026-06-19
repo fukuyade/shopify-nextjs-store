@@ -13,7 +13,11 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "DRIFT SPORTS｜四季のスポーツを、はじめる人へ",
+  title: {
+    default: "DRIFT SPORTS｜四季のスポーツを、はじめる人へ",
+    // 各ページが文字列のtitleを返すと "ページ名 | DRIFT SPORTS" に整形される
+    template: "%s | DRIFT SPORTS",
+  },
   description:
     "ウィンター・サマー・ボール・アウトドア。四季のアクティビティを、これから始める人にも選びやすく。初心者歓迎のスポーツギア・セレクトショップ DRIFT SPORTS。",
 };

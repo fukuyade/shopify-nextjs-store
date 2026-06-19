@@ -1,7 +1,7 @@
 import ContactForm from '@/components/sections/ContactForm';
 
 export const metadata = {
-  title: 'お問い合わせ | DRIFT SPORTS',
+  title: 'お問い合わせ',
   description: 'DRIFT SPORTSへのお問い合わせはこちらから。',
 };
 

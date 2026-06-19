@@ -8,6 +8,14 @@ type Props = {
   params: Promise<{ handle: string; sub: string }>;
 };
 
+export async function generateMetadata({ params }: Props) {
+  const { handle, sub } = await params;
+  const collection = getCollectionByHandle(handle);
+  const subcategory = collection?.subcategories.find((s) => s.handle === sub);
+  if (!collection || !subcategory) return { title: 'カテゴリ' };
+  return { title: `${subcategory.title}｜${collection.title}` };
+}
+
 export default async function SubCategoryPage({ params }: Props) {
   const { handle, sub } = await params;
   const collection = getCollectionByHandle(handle);

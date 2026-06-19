@@ -5,7 +5,7 @@ import { COOKIE } from '@/lib/auth-cookies';
 import ProfileForm from '@/components/sections/ProfileForm';
 
 export const metadata = {
-  title: 'お名前の登録 | DRIFT SPORTS',
+  title: 'お名前の登録',
   description: 'お名前を登録してください',
 };
 

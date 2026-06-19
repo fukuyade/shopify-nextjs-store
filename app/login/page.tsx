@@ -3,7 +3,7 @@
 // 新規登録もそのログイン画面側で行える。
 
 export const metadata = {
-  title: 'ログイン | DRIFT SPORTS',
+  title: 'ログイン',
   description: 'アカウントにログイン',
 };
 

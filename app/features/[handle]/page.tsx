@@ -8,6 +8,13 @@ type Props = {
   params: Promise<{ handle: string }>;
 };
 
+export async function generateMetadata({ params }: Props) {
+  const { handle } = await params;
+  const feature = getFeatureByHandle(handle);
+  if (!feature) return { title: '特集' };
+  return { title: feature.title, description: feature.subtitle };
+}
+
 export default async function FeaturePage({ params }: Props) {
   const { handle } = await params;
   const feature = getFeatureByHandle(handle);

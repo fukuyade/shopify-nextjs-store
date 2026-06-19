@@ -8,6 +8,13 @@ type Props = {
   params: Promise<{ handle: string }>;
 };
 
+export async function generateMetadata({ params }: Props) {
+  const { handle } = await params;
+  const collection = getCollectionByHandle(handle);
+  if (!collection) return { title: 'コレクション' };
+  return { title: collection.title, description: collection.description };
+}
+
 export default async function CollectionPage({ params }: Props) {
   const { handle } = await params;
   const collection = getCollectionByHandle(handle);

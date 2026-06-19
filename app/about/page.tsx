@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { COLLECTIONS } from '@/lib/collections';
 
 export const metadata = {
-  title: 'About | DRIFT SPORTS',
+  title: 'About',
   description: 'DRIFT SPORTSについて。スノーボードからテニスまで、厳選したアウトドア・スポーツギアをお届けします。',
 };
 
