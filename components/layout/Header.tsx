@@ -84,8 +84,11 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center gap-3">
 
         {/* ロゴ */}
-        <Link href="/" className="text-xl font-bold text-gray-900 hover:text-gray-600 transition-colors flex-shrink-0">
-          MyStore
+        <Link
+          href="/"
+          className="flex-shrink-0 whitespace-nowrap text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 hover:text-gray-600 transition-colors"
+        >
+          DRIFT<span className="font-bold text-gray-400"> SPORTS</span>
         </Link>
 
         {/* 検索フォーム（中央・PC） */}

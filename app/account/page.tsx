@@ -5,7 +5,7 @@ import { COOKIE } from '@/lib/auth-cookies';
 import AccountView from '@/components/sections/AccountView';
 
 export const metadata = {
-  title: 'アカウント | MyStore',
+  title: 'アカウント | DRIFT SPORTS',
   description: 'アカウント情報と注文履歴',
 };
 

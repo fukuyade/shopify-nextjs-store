@@ -2,16 +2,16 @@ import Link from 'next/link';
 import { COLLECTIONS } from '@/lib/collections';
 
 export const metadata = {
-  title: 'About | MyStore',
-  description: 'MyStoreについて。スノーボードからテニスまで、厳選したアウトドア・スポーツギアをお届けします。',
+  title: 'About | DRIFT SPORTS',
+  description: 'DRIFT SPORTSについて。スノーボードからテニスまで、厳選したアウトドア・スポーツギアをお届けします。',
 };
 
 export default function AboutPage() {
   return (
     <section className="max-w-3xl mx-auto px-4 py-16">
-      <h1 className="text-3xl font-bold text-gray-900">MyStore について</h1>
+      <h1 className="text-3xl font-bold text-gray-900">DRIFT SPORTS について</h1>
       <p className="mt-4 text-gray-600 leading-relaxed">
-        MyStore は、ウィンタースポーツからボールスポーツ、アウトドアまで、
+        DRIFT SPORTS は、ウィンタースポーツからボールスポーツ、アウトドアまで、
         季節やシーンを問わず「外で遊ぶ」すべての人のためのオンラインストアです。
         初めての一歩を踏み出す方にも、長く付き合える道具を探している方にも、
         自信を持っておすすめできるギアだけを厳選してお届けします。

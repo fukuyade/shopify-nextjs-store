@@ -1,8 +1,8 @@
 import ContactForm from '@/components/sections/ContactForm';
 
 export const metadata = {
-  title: 'お問い合わせ | MyStore',
-  description: 'MyStoreへのお問い合わせはこちらから。',
+  title: 'お問い合わせ | DRIFT SPORTS',
+  description: 'DRIFT SPORTSへのお問い合わせはこちらから。',
 };
 
 export default function ContactPage() {

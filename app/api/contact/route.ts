@@ -40,7 +40,7 @@ async function sendViaResend(params: { name: string; email: string; message: str
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      from: `MyStore お問い合わせ <${FROM_EMAIL}>`,
+      from: `DRIFT SPORTS お問い合わせ <${FROM_EMAIL}>`,
       to: [TO_EMAIL],
       reply_to: params.email, // 返信するとそのまま問い合わせ者へ返せる
       subject: `【お問い合わせ】${params.name} さんより`,

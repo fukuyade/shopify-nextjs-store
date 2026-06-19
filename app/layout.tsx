@@ -13,8 +13,9 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "MyStore",
-  description: "厳選されたアイテムをお届けするオンラインショップ",
+  title: "DRIFT SPORTS｜四季のスポーツを、はじめる人へ",
+  description:
+    "ウィンター・サマー・ボール・アウトドア。四季のアクティビティを、これから始める人にも選びやすく。初心者歓迎のスポーツギア・セレクトショップ DRIFT SPORTS。",
 };
 
 export default function RootLayout({

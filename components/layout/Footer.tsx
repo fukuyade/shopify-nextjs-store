@@ -7,9 +7,11 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
         {/* ブランド */}
         <div className="col-span-2 md:col-span-1">
-          <p className="text-white font-bold text-lg mb-2">MyStore</p>
+          <p className="text-white font-extrabold text-lg mb-2 tracking-tight">
+            DRIFT<span className="text-gray-500"> SPORTS</span>
+          </p>
           <p className="text-sm leading-relaxed">
-            スノーボードからテニスまで、厳選されたアウトドアギアをお届けします。
+            ウィンターからサマー、ボール、アウトドアまで。四季のアクティビティを、これから始める人にも選びやすく。
           </p>
         </div>
 
@@ -48,7 +50,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-gray-800 text-center py-4 text-xs">
-        © {new Date().getFullYear()} MyStore. All rights reserved.
+        © {new Date().getFullYear()} DRIFT SPORTS. All rights reserved.
       </div>
     </footer>
   );
