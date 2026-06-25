@@ -65,8 +65,33 @@ function slugify(text: string): string {
     .replace(/-+/g, '-');
 }
 
+// Client Credentials Grantのトークンは数時間で失効するため、固定トークンを
+// 環境変数に持たず、リクエストごとにその場で取得する(失効しないclient_id/secretのみ保持)。
+async function getAdminAccessToken(): Promise<string> {
+  const clientId = process.env.SHOPIFY_ADMIN_CLIENT_ID!;
+  const clientSecret = process.env.SHOPIFY_ADMIN_CLIENT_SECRET!;
+
+  const res = await fetch(`https://${STORE_DOMAIN}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'client_credentials',
+    }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(`Admin APIトークンの取得に失敗しました: ${res.status} ${detail}`);
+  }
+
+  const data = await res.json();
+  return data.access_token as string;
+}
+
 async function updateProductHandle(productId: string, handle: string): Promise<void> {
-  const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN!;
+  const token = await getAdminAccessToken();
   const res = await fetch(`https://${STORE_DOMAIN}/admin/api/${ADMIN_API_VERSION}/graphql.json`, {
     method: 'POST',
     headers: {
