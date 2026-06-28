@@ -122,9 +122,19 @@ async function updateProductHandle(productId: string, handle: string): Promise<v
   }
 
   const data = await res.json();
+
+  // GraphQLのトップレベルエラー(権限不足など)はuserErrorsに乗らないため別途チェックする
+  if (data.errors?.length) {
+    throw new Error(`GraphQLエラー: ${JSON.stringify(data.errors)}`);
+  }
+
   const userErrors = data.data?.productUpdate?.userErrors;
   if (userErrors?.length) {
     throw new Error(`handle更新に失敗しました: ${JSON.stringify(userErrors)}`);
+  }
+
+  if (!data.data?.productUpdate?.product?.handle) {
+    throw new Error(`handle更新の結果を確認できませんでした: ${JSON.stringify(data)}`);
   }
 }
 
