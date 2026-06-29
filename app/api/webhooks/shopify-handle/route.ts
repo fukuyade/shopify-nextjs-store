@@ -5,8 +5,9 @@ import crypto from 'crypto';
 // 日本語タイトルの商品はDeepLで英訳してhandleを自動更新する。
 //
 // 必要な環境変数:
-//   SHOPIFY_WEBHOOK_SECRET     … Webhook署名検証用（fuku-make-app2のAPIシークレット）
-//   SHOPIFY_ADMIN_ACCESS_TOKEN … 商品handle更新用（fuku-make-app2のAdmin APIアクセストークン）
+//   SHOPIFY_WEBHOOK_SECRET     … Webhook署名検証用（ストア共通のWebhook署名シークレット）
+//   SHOPIFY_ADMIN_ACCESS_TOKEN … 商品handle更新用（/api/admin-oauth/install で取得した、
+//                                 ユーザーに紐づくfuku-make-app2のAdmin APIアクセストークン）
 //   DEEPL_API_KEY              … DeepL Free APIキー
 //
 // Shopify管理画面で products/create と products/update の2つのwebhookを
@@ -65,33 +66,12 @@ function slugify(text: string): string {
     .replace(/-+/g, '-');
 }
 
-// Client Credentials Grantのトークンは数時間で失効するため、固定トークンを
-// 環境変数に持たず、リクエストごとにその場で取得する(失効しないclient_id/secretのみ保持)。
-async function getAdminAccessToken(): Promise<string> {
-  const clientId = process.env.SHOPIFY_ADMIN_CLIENT_ID!;
-  const clientSecret = process.env.SHOPIFY_ADMIN_CLIENT_SECRET!;
-
-  const res = await fetch(`https://${STORE_DOMAIN}/admin/oauth/access_token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      grant_type: 'client_credentials',
-    }),
-  });
-
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Admin APIトークンの取得に失敗しました: ${res.status} ${detail}`);
-  }
-
-  const data = await res.json();
-  return data.access_token as string;
-}
-
 async function updateProductHandle(productId: string, handle: string): Promise<void> {
-  const token = await getAdminAccessToken();
+  // Client Credentials Grantのトークンは「ユーザーに紐づかない」ため、
+  // productUpdate等の一部ミューテーションでアクセス拒否される。
+  // /api/admin-oauth/install の通常OAuthフローで取得した、ユーザーに紐づく
+  // 固定トークンを使う(アプリがアンインストールされない限り失効しない)。
+  const token = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN!;
   const res = await fetch(`https://${STORE_DOMAIN}/admin/api/${ADMIN_API_VERSION}/graphql.json`, {
     method: 'POST',
     headers: {
