@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getCollectionByHandle } from '@/lib/collections';
 import { getProductsByTag } from '@/lib/shopify';
 import ProductCard from '@/components/ui/ProductCard';
+import { getCollectionPageJsonLd, getItemListJsonLd, getBreadcrumbJsonLd } from '@/lib/structured-data';
 
 type Props = {
   params: Promise<{ handle: string }>;
@@ -23,7 +24,29 @@ export default async function CollectionPage({ params }: Props) {
 
   const products = await getProductsByTag(collection.tags);
 
+  const collectionPageJsonLd = getCollectionPageJsonLd(collection);
+  const itemListJsonLd = getItemListJsonLd(products, collection.title);
+  const breadcrumbJsonLd = getBreadcrumbJsonLd([
+    { name: 'ホーム', href: '/' },
+    { name: 'コレクション', href: '/collections' },
+    { name: collection.title, href: `/collections/${collection.handle}` },
+  ]);
+
   return (
+    <>
+      {/* GEO: CollectionPage + ItemList + BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
     <section className="max-w-6xl mx-auto px-4 py-12">
       {/* ヘッダー */}
       <div className="mb-10">
@@ -64,5 +87,6 @@ export default async function CollectionPage({ params }: Props) {
         </div>
       )}
     </section>
+    </>
   );
 }

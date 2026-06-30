@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getCollectionByHandle } from '@/lib/collections';
 import { getProductsByTag } from '@/lib/shopify';
 import SubCategoryFilter from '@/components/sections/SubCategoryFilter';
+import { getCollectionPageJsonLd, getItemListJsonLd, getBreadcrumbJsonLd } from '@/lib/structured-data';
 
 type Props = {
   params: Promise<{ handle: string; sub: string }>;
@@ -26,7 +27,34 @@ export default async function SubCategoryPage({ params }: Props) {
 
   const products = await getProductsByTag(subcategory.tags);
 
+  const collectionPageJsonLd = getCollectionPageJsonLd({
+    title: subcategory.title,
+    handle: `${handle}/${sub}`,
+    description: `${collection.title} > ${subcategory.title}の商品一覧`,
+  });
+  const itemListJsonLd = getItemListJsonLd(products, subcategory.title);
+  const breadcrumbJsonLd = getBreadcrumbJsonLd([
+    { name: 'ホーム', href: '/' },
+    { name: 'コレクション', href: '/collections' },
+    { name: collection.title, href: `/collections/${handle}` },
+    { name: subcategory.title, href: `/collections/${handle}/${sub}` },
+  ]);
+
   return (
+    <>
+      {/* GEO: CollectionPage + ItemList + BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
     <section className="max-w-6xl mx-auto px-4 py-12">
       {/* パンくず */}
       <div className="mb-10">
@@ -51,5 +79,6 @@ export default async function SubCategoryPage({ params }: Props) {
         subSubcategories={subcategory.subSubcategories ?? []}
       />
     </section>
+    </>
   );
 }

@@ -234,6 +234,36 @@ export async function getProductByHandle(handle: string): Promise<ProductDetail 
   return response.data.productByHandle ?? null;
 }
 
+// サイトマップ用：全公開商品を取得（handle のみ使用）
+const ALL_PRODUCTS_QUERY = `
+  query GetAllProducts($first: Int!) {
+    products(first: $first, query: "status:active") {
+      edges {
+        node {
+          id
+          title
+          handle
+          description
+          tags
+          priceRange {
+            minVariantPrice { amount currencyCode }
+          }
+          images(first: 1) {
+            edges { node { url altText } }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function getAllProducts(count = 250): Promise<Product[]> {
+  const response: ProductsResponse = await shopifyFetch(ALL_PRODUCTS_QUERY, {
+    first: count,
+  });
+  return response.data.products.edges.map((edge) => edge.node);
+}
+
 // カートのフィールド（クエリ・ミューテーションで共通利用）
 const CART_FIELDS = `
   id

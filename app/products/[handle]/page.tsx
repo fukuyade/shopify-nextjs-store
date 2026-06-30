@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getProductByHandle } from '@/lib/shopify';
 import ProductDetailSection from '@/components/sections/ProductDetailSection';
+import { getProductJsonLd, getBreadcrumbJsonLd } from '@/lib/structured-data';
 
 type Props = {
   params: Promise<{ handle: string }>;
@@ -25,5 +26,24 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
-  return <ProductDetailSection product={product} />;
+  const productJsonLd = getProductJsonLd(product);
+  const breadcrumbJsonLd = getBreadcrumbJsonLd([
+    { name: 'ホーム', href: '/' },
+    { name: product.title, href: `/products/${product.handle}` },
+  ]);
+
+  return (
+    <>
+      {/* GEO: Product スキーマ + BreadcrumbList */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <ProductDetailSection product={product} />
+    </>
+  );
 }
