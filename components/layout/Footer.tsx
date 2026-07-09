@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-400 mt-16">
       <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
-        {/* ブランド */}
+        {/* brand */}
         <div className="col-span-2 md:col-span-1">
           <p className="text-white font-extrabold text-lg mb-2 tracking-tight">
             DRIFT<span className="text-gray-500"> SPORTS</span>
@@ -15,7 +15,7 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* ショップ */}
+        {/* shop */}
         <div>
           <p className="text-white font-semibold mb-3 text-sm">ショップ</p>
           <ul className="space-y-2 text-sm">
@@ -25,32 +25,33 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* コレクション */}
+        {/* collections */}
         <div>
           <p className="text-white font-semibold mb-3 text-sm">カテゴリ</p>
           <ul className="space-y-2 text-sm">
             {COLLECTIONS.map((c) => (
               <li key={c.handle}>
                 <Link href={`/collections/${c.handle}`} className="hover:text-white transition-colors">
-                 {c.title}
+                  {c.title}
                 </Link>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* サポート */}
+        {/* support */}
         <div>
           <p className="text-white font-semibold mb-3 text-sm">サポート</p>
           <ul className="space-y-2 text-sm">
             <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+            <li><Link href="/faq" className="hover:text-white transition-colors">よくある質問</Link></li>
             <li><Link href="/contact" className="hover:text-white transition-colors">お問い合わせ</Link></li>
           </ul>
         </div>
       </div>
 
       <div className="border-t border-gray-800 text-center py-4 text-xs">
-        © {new Date().getFullYear()} DRIFT SPORTS. All rights reserved.
+        {`© ${new Date().getFullYear()} DRIFT SPORTS. All rights reserved.`}
       </div>
     </footer>
   );
