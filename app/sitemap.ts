@@ -10,6 +10,7 @@
 import { MetadataRoute } from 'next';
 import { getAllProducts } from '@/lib/shopify';
 import { COLLECTIONS } from '@/lib/collections';
+import { GUIDES } from '@/lib/guides';
 
 const SITE_URL = 'https://shopify-nextjs-store.vercel.app';
 
@@ -70,5 +71,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticUrls, ...productUrls, ...collectionUrls];
+  // ガイド記事
+  const guideUrls: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE_URL}/guide`,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    ...GUIDES.map((g) => ({
+      url: `${SITE_URL}/guide/${g.handle}`,
+      lastModified: new Date(g.date),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    })),
+  ];
+
+  return [...staticUrls, ...productUrls, ...collectionUrls, ...guideUrls];
 }

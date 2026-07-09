@@ -44,6 +44,7 @@ export default function Footer() {
           <p className="text-white font-semibold mb-3 text-sm">サポート</p>
           <ul className="space-y-2 text-sm">
             <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+            <li><Link href="/guide" className="hover:text-white transition-colors">ガイド</Link></li>
             <li><Link href="/faq" className="hover:text-white transition-colors">よくある質問</Link></li>
             <li><Link href="/contact" className="hover:text-white transition-colors">お問い合わせ</Link></li>
           </ul>
